@@ -142,3 +142,23 @@ Content-Type: application/json
         client.assert(response.status === 400, "Expected 400, got " + response.status);
     });
 %}
+
+### 10. Unknown route -> 404 envelope
+GET {{host}}/accountz
+
+> {%
+    client.test("404 not 500", function () {
+        client.assert(response.status === 404, "Expected 404, got " + response.status);
+        client.assert(response.body.message !== undefined, "Missing message field");
+    });
+%}
+
+
+### 11. Wrong HTTP method -> 405 envelope
+DELETE {{host}}/accounts
+
+> {%
+    client.test("405 method not allowed", function () {
+        client.assert(response.status === 405, "Expected 405, got " + response.status);
+    });
+%}
