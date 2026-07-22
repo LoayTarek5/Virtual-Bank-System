@@ -33,4 +33,9 @@ public class AccountController {
     public List<AccountResponse> getByUserId(@PathVariable UUID userId) {
         return service.getByUserId(userId);
     }
+
+    @PutMapping("/accounts/transfer")
+    public MessageResponse transfer(@Valid @RequestBody TransferRequest request) {
+        return service.transfer(request);
+    }
 }

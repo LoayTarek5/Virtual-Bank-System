@@ -162,3 +162,108 @@ DELETE {{host}}/accounts
         client.assert(response.status === 405, "Expected 405, got " + response.status);
     });
 %}
+
+### 12. Transfer 30 -> 200
+PUT {{host}}/accounts/transfer
+Content-Type: application/json
+
+{
+  "fromAccountId": "{{accountId}}",
+  "toAccountId": "{{secondAccountId}}",
+  "amount": 30.00
+}
+
+> {%
+    client.test("200 with contract message", function () {
+        client.assert(response.status === 200, "Expected 200, got " + response.status);
+        client.assert(response.body.message === "Account updated successfully.", "Wrong message");
+    });
+%}
+
+
+### 13. Sender debited to 70.00
+GET {{host}}/accounts/{{accountId}}
+
+> {%
+    client.test("balance is 70.00", function () {
+        client.assert(response.body.balance === 70.00, "Expected 70.00, got " + response.body.balance);
+    });
+%}
+
+
+### 14. Receiver credited to 80.00
+GET {{host}}/accounts/{{secondAccountId}}
+
+> {%
+    client.test("balance is 80.00", function () {
+        client.assert(response.body.balance === 80.00, "Expected 80.00, got " + response.body.balance);
+    });
+%}
+
+
+### 15. Insufficient funds -> 400
+PUT {{host}}/accounts/transfer
+Content-Type: application/json
+
+{
+  "fromAccountId": "{{accountId}}",
+  "toAccountId": "{{secondAccountId}}",
+  "amount": 99999.00
+}
+
+> {%
+    client.test("400 insufficient funds", function () {
+        client.assert(response.status === 400, "Expected 400, got " + response.status);
+    });
+%}
+
+
+### 16. Unknown account -> 400 (not 404, per contract)
+PUT {{host}}/accounts/transfer
+Content-Type: application/json
+
+{
+  "fromAccountId": "{{accountId}}",
+  "toAccountId": "00000000-0000-0000-0000-000000000000",
+  "amount": 10.00
+}
+
+> {%
+    client.test("400 invalid account id", function () {
+        client.assert(response.status === 400, "Expected 400, got " + response.status);
+    });
+%}
+
+
+### 17. Same account -> 400
+PUT {{host}}/accounts/transfer
+Content-Type: application/json
+
+{
+  "fromAccountId": "{{accountId}}",
+  "toAccountId": "{{accountId}}",
+  "amount": 10.00
+}
+
+> {%
+    client.test("400 same account", function () {
+        client.assert(response.status === 400, "Expected 400, got " + response.status);
+    });
+%}
+
+
+### 18. Negative amount -> 400 from @Positive
+PUT {{host}}/accounts/transfer
+Content-Type: application/json
+
+{
+  "fromAccountId": "{{accountId}}",
+  "toAccountId": "{{secondAccountId}}",
+  "amount": -10.00
+}
+
+> {%
+    client.test("400 negative amount", function () {
+        client.assert(response.status === 400, "Expected 400, got " + response.status);
+    });
+%}
