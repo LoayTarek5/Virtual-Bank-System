@@ -5,9 +5,9 @@ spring:
   application:
     name: user-service
   datasource:
-    url: jdbc:postgresql://localhost:5432/vbank_user
-    username: postgres
-    password: postgres
+    url: jdbc:postgresql://localhost:5432/vbank_users
+    username: vbank
+    password: vbank
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
