@@ -1,0 +1,144 @@
+@host = http://localhost:8082
+@userId = a1b2c3d4-e5f6-7890-1234-567890abcdef
+
+
+### 1. Create account -> 201
+POST {{host}}/accounts
+Content-Type: application/json
+
+{
+  "userId": "{{userId}}",
+  "accountType": "SAVINGS",
+  "initialBalance": 100.00
+}
+
+> {%
+    client.test("201 with accountId and 10-digit accountNumber", function () {
+        client.assert(response.status === 201, "Expected 201, got " + response.status);
+        client.assert(response.body.accountId !== undefined, "Missing accountId");
+        client.assert(response.body.accountNumber.length === 10, "accountNumber must be 10 digits");
+    });
+    client.global.set("accountId", response.body.accountId);
+%}
+
+
+### 2. Create a second account -> 201  (needed later by the transfer endpoint)
+POST {{host}}/accounts
+Content-Type: application/json
+
+{
+  "userId": "{{userId}}",
+  "accountType": "CHECKING",
+  "initialBalance": 50.00
+}
+
+> {%
+    client.test("201 created", function () {
+        client.assert(response.status === 201, "Expected 201, got " + response.status);
+    });
+    client.global.set("secondAccountId", response.body.accountId);
+%}
+
+
+### 3. Get account by id -> 200
+GET {{host}}/accounts/{{accountId}}
+
+> {%
+    client.test("200 with contract fields", function () {
+        client.assert(response.status === 200, "Expected 200, got " + response.status);
+        client.assert(response.body.accountType === "SAVINGS", "Wrong accountType");
+        client.assert(response.body.status === "ACTIVE", "New account must be ACTIVE");
+    });
+%}
+
+
+### 4. List accounts by user -> 200 + array
+GET {{host}}/users/{{userId}}/accounts
+
+> {%
+    client.test("200 with at least two accounts", function () {
+        client.assert(response.status === 200, "Expected 200, got " + response.status);
+        client.assert(response.body.length >= 2, "Expected 2+ accounts");
+    });
+%}
+
+
+### ---------------------------------------------------------------
+### Error paths — all must return the §0 envelope:
+### { "status": n, "error": "...", "message": "..." }
+### ---------------------------------------------------------------
+
+### 5. Unknown account -> 404
+GET {{host}}/accounts/00000000-0000-0000-0000-000000000000
+
+> {%
+    client.test("404 envelope", function () {
+        client.assert(response.status === 404, "Expected 404, got " + response.status);
+        client.assert(response.body.error === "Not Found", "Wrong error text");
+        client.assert(response.body.message !== undefined, "Missing message field");
+    });
+%}
+
+
+### 6. Invalid enum value -> 400
+POST {{host}}/accounts
+Content-Type: application/json
+
+{
+  "userId": "{{userId}}",
+  "accountType": "GOLD",
+  "initialBalance": 100.00
+}
+
+> {%
+    client.test("400 envelope, not Spring default", function () {
+        client.assert(response.status === 400, "Expected 400, got " + response.status);
+        client.assert(response.body.message !== undefined, "Missing message — handler gap");
+        client.assert(response.body.path === undefined, "Spring default body leaked through");
+    });
+%}
+
+
+### 7. Malformed UUID in path -> 400
+GET {{host}}/accounts/not-a-uuid
+
+> {%
+    client.test("400 envelope", function () {
+        client.assert(response.status === 400, "Expected 400, got " + response.status);
+        client.assert(response.body.message !== undefined, "Missing message field");
+    });
+%}
+
+
+### 8. Negative balance -> 400 from @PositiveOrZero
+POST {{host}}/accounts
+Content-Type: application/json
+
+{
+  "userId": "{{userId}}",
+  "accountType": "SAVINGS",
+  "initialBalance": -5
+}
+
+> {%
+    client.test("400 naming the offending field", function () {
+        client.assert(response.status === 400, "Expected 400, got " + response.status);
+        client.assert(response.body.message.includes("initialBalance"), "Message should name the field");
+    });
+%}
+
+
+### 9. Missing required field -> 400 from @NotNull
+POST {{host}}/accounts
+Content-Type: application/json
+
+{
+  "accountType": "SAVINGS",
+  "initialBalance": 100.00
+}
+
+> {%
+    client.test("400 for missing userId", function () {
+        client.assert(response.status === 400, "Expected 400, got " + response.status);
+    });
+%}
