@@ -1,4 +1,4 @@
-package com.vbank.user_service;
+package com.vbank.user;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
