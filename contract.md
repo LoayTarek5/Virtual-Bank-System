@@ -148,7 +148,7 @@ Lists all accounts for a user.
 Responses:
 - `200 OK` — JSON array of account objects (same shape as GET /accounts/{accountId}).
 - `404 Not Found` — no accounts for this user.
-    - ⚠️ Spec says 404; we follow it. (Arguably `200 []` is cleaner — revisit only with mentor approval.)
+  - ⚠️ Spec says 404; we follow it. (Arguably `200 []` is cleaner — revisit only with mentor approval.)
 
 ### PUT /accounts/transfer
 Atomically debits `fromAccountId` and credits `toAccountId`. **Single DB transaction (`@Transactional`)** — both updates commit or neither does. Updates `lastTransactionAt` on both accounts.
@@ -482,80 +482,7 @@ Conventions:
 
 ---
 
-## 10. Database design
-
-**Principle: database-per-service.** One Postgres container (docker-compose), four logical databases inside it. A service only ever touches its own database; cross-service data access goes through REST APIs. **No foreign keys across databases** — references like `accounts.user_id` are plain UUID values, validated via API calls, not FK constraints. BFF has no database.
-
-| Database | Owner service |
-|---|---|
-| `vbank_users` | user-service |
-| `vbank_accounts` | account-service |
-| `vbank_transactions` | transaction-service |
-| `vbank_logs` | logging-service |
-
-### `vbank_users.users`
-
-| Column | Type | Constraints | Notes |
-|---|---|---|---|
-| `user_id` | UUID | PK | generated server-side |
-| `username` | VARCHAR(50) | UNIQUE, NOT NULL | 409 on duplicate |
-| `email` | VARCHAR(255) | UNIQUE, NOT NULL | 409 on duplicate |
-| `password_hash` | VARCHAR(60) | NOT NULL | BCrypt output is exactly 60 chars; never store plaintext |
-| `first_name` | VARCHAR(100) | NOT NULL | |
-| `last_name` | VARCHAR(100) | NOT NULL | |
-| `created_at` | TIMESTAMP | NOT NULL DEFAULT now() | |
-
-### `vbank_accounts.accounts`
-
-| Column | Type | Constraints | Notes |
-|---|---|---|---|
-| `account_id` | UUID | PK | |
-| `user_id` | UUID | NOT NULL | logical reference only — no FK (different DB) |
-| `account_number` | VARCHAR(10) | UNIQUE, NOT NULL | 10-digit, generated |
-| `account_type` | VARCHAR(10) | NOT NULL, CHECK in (SAVINGS, CHECKING, SYSTEM) | |
-| `balance` | NUMERIC(19,2) | NOT NULL, CHECK >= 0 | **never FLOAT/DOUBLE** — `BigDecimal` in Java |
-| `status` | VARCHAR(10) | NOT NULL DEFAULT 'ACTIVE', CHECK in (ACTIVE, INACTIVE) | |
-| `last_transaction_at` | TIMESTAMP | NULL | updated by every transfer; drives stale job |
-| `created_at` | TIMESTAMP | NOT NULL DEFAULT now() | |
-
-Indexes: `idx_accounts_user_id (user_id)` for `GET /users/{userId}/accounts`; `idx_accounts_stale (status, last_transaction_at)` for the hourly job.
-
-### `vbank_transactions.transactions`
-
-| Column | Type | Constraints | Notes |
-|---|---|---|---|
-| `transaction_id` | UUID | PK | |
-| `from_account_id` | UUID | NOT NULL | logical reference to accounts |
-| `to_account_id` | UUID | NOT NULL | logical reference to accounts |
-| `amount` | NUMERIC(19,2) | NOT NULL, CHECK > 0 | |
-| `description` | VARCHAR(255) | NULL | |
-| `status` | VARCHAR(10) | NOT NULL, CHECK in (INITIATED, SUCCESS, FAILED) | the two-phase state machine |
-| `timestamp` | TIMESTAMP | NOT NULL DEFAULT now() | |
-
-Indexes: `idx_tx_from (from_account_id)`, `idx_tx_to (to_account_id)` — history query is `WHERE from_account_id = ? OR to_account_id = ? ORDER BY timestamp DESC`.
-
-⚠️ The spec's history response example includes a `deliveryStatus` field (`SENT`/`DELIVERED`) that is never defined anywhere else in the document. Options: (a) add a `delivery_status VARCHAR(10)` column defaulting to `SENT`, or (b) drop the field. **Ask the mentor; record the answer in decisions.md.**
-
-### `vbank_logs.logs` (dump table)
-
-| Column | Type | Constraints | Notes |
-|---|---|---|---|
-| `id` | BIGSERIAL | PK | high-volume append-only → sequence, not UUID |
-| `message` | TEXT | NOT NULL | escaped request/response JSON |
-| `message_type` | VARCHAR(10) | NOT NULL, CHECK in (Request, Response) | |
-| `date_time` | TIMESTAMP | NOT NULL | when the producer generated the log |
-| `created_at` | TIMESTAMP | NOT NULL DEFAULT now() | when the consumer inserted it |
-
-### Operational notes
-
-- **Schema management**: `spring.jpa.hibernate.ddl-auto=update` is acceptable for this project's scope (note it in decisions.md); switch to `validate` + an `init.sql` if the mentor prefers explicit DDL.
-- **docker-compose**: one `postgres:16` container with an init script creating the four databases; each service's `application.yml` points to its own database URL.
-- **Concurrency on transfers**: the debit+credit in account-service runs in one `@Transactional` method; Postgres row locks on the two `UPDATE`s prevent lost updates. Lock accounts in a **consistent order (e.g. by accountId)** to avoid deadlocks when two opposite transfers run concurrently.
-- Money is `NUMERIC(19,2)` / `BigDecimal` everywhere. Floating point for money is a bug, full stop.
-
----
-
-
+## Change log
 
 | Date | Change | Agreed by |
 |---|---|---|
