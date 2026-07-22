@@ -1,0 +1,21 @@
+### Build output ###
+target/
+build/
+
+### Maven wrapper — keep the jar so ./mvnw works after clone ###
+!.mvn/wrapper/maven-wrapper.jar
+
+### IDEs ###
+.idea/
+*.iml
+*.iws
+*.ipr
+.vscode/
+.classpath
+.project
+.settings/
+
+### OS / misc ###
+.DS_Store
+*.log
+HELP.md

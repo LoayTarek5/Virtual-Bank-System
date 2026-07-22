@@ -1,0 +1,13 @@
+package com.vbank;
+
+import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
+
+@SpringBootTest
+class VbankApplicationTests {
+
+	@Test
+	void contextLoads() {
+	}
+
+}
