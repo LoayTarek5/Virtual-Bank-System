@@ -9,7 +9,8 @@
 
 | Concern | Convention |
 |---|---|
-| Java / Spring | Java 21, Spring Boot 3.x (same version in every service; ⚠️ deviates from spec's Java 11, approved by mentor) |
+| Java / Spring | Java 21, Spring Boot 4.1.0 (same version in every service, inherited from the parent pom) |
+| Build | Multi-module Maven — parent `com.vbank:vbank` declares Java/Boot versions once; one module per service |
 | Base path style | No `/api/v1` prefix — paths exactly as below (gateway does external mapping) |
 | IDs | UUID v4 strings, generated server-side |
 | Money | `BigDecimal` in code, JSON number with 2 decimal places. Currency implicit (single currency) |
@@ -327,9 +328,9 @@ Message format (JSON string value):
 ## 7. Work plan — ordered steps per person
 
 ### Both together (Day 1–2)
-1. Create the GitHub monorepo (`user-service/`, `account-service/`, `transaction-service/`, `bff-service/`, `logging-service/`, `docker-compose.yml`, `contracts.md`, `decisions.md`).
+1. Create the GitHub monorepo (parent `pom.xml`, one module per service, `docker-compose.yml`, `init/`, `http/`, `contracts.md`).
 2. Agree on and commit this contract; protect `main`; agree PR review rules.
-3. Generate the 5 Spring Boot 3.x (Java 21) skeletons from start.spring.io with agreed package naming (`com.vbank.<service>`).
+3. Generate the 5 Spring Boot 4.1 (Java 21) modules with agreed package naming (`com.vbank.<service>`); each child pom inherits from the parent.
 4. Set up the shared GitHub Projects board with one card per endpoint/feature below.
 
 ### Loay — the money path (in order)
@@ -371,7 +372,7 @@ Message format (JSON string value):
 
 ### Both
 - **REST API design**: status codes (200/201/400/401/404/409/500), request/response DTOs, validation.
-- **Spring Boot 3.x fundamentals**: controller → service → repository layering, `@RestController`, `@Service`, dependency injection, `application.yml` profiles, Jakarta namespace (not `javax`).
+- **Spring Boot 4.1 fundamentals**: controller → service → repository layering, `@RestController`, `@Service`, dependency injection, `application.yml`, Jakarta namespace (not `javax`). ⚠️ Boot 4 renamed starters — tutorials showing `spring-boot-starter-web` mean `spring-boot-starter-webmvc` here.
 - **Spring Data JPA**: entities, repositories, derived query methods, `@Transactional` semantics.
 - **Java 21 features worth using**: records for DTOs, switch expressions, (optional) virtual threads.
 - **Kafka basics**: topics, producers, consumers, consumer groups, why async logging beats synchronous DB writes; `spring-kafka` (`KafkaTemplate`, `@KafkaListener`).
@@ -398,13 +399,17 @@ Message format (JSON string value):
 
 ```
 vbank/                                  # monorepo root
-├── contracts.md                        # this file — frozen API contracts
-├── decisions.md                        # log of agreed decisions/deviations
+├── pom.xml                             # parent aggregator — Java/Boot versions, module list
+├── contracts.md                        # this file — frozen API contracts (incl. §11 decisions)
 ├── README.md                           # setup + run instructions + demo script
 ├── docker-compose.yml                  # postgres, kafka, zookeeper (+ services later)
+├── init/
+│   └── create-databases.sql            # creates the four per-service databases
 ├── .github/
 │   └── workflows/
-│       └── build.yml                   # optional CI: build all services on PR
+│       └── build.yml                   # optional CI: build all modules on PR
+├── http/
+│   └── account-service.http            # IntelliJ HTTP Client tests, one file per service
 ├── postman/
 │   └── vbank.postman_collection.json   # shared regression collection
 │
@@ -476,9 +481,103 @@ Conventions:
 - Every service follows the same `controller / service / repository / model / dto / exception / logging` package layout — user-service is shown fully as the template; the rest only show what differs.
 - **DTOs are Java 21 records**, one per request/response shape in this contract.
 - **`GlobalExceptionHandler`** in each service maps exceptions to the §0 error envelope — copy the same class everywhere so error responses stay identical.
-- **`KafkaLogProducer`** is intentionally duplicated per service (a shared library module is overkill for a 1-month project — note it in `decisions.md`).
+- **`KafkaLogProducer`** is intentionally duplicated per service (a shared library module is overkill for a 1-month project — see §11).
 - BFF has **no database** (no model/repository); logging-service has **no controller** (no public HTTP endpoints).
 - `application.yml` per service holds its port (§0 table), datasource, and `spring.kafka.bootstrap-servers`.
+
+---
+
+## 10. Database design
+
+**Principle: database-per-service.** One Postgres container (docker-compose), four logical databases inside it. A service only ever touches its own database; cross-service data access goes through REST APIs. **No foreign keys across databases** — references like `accounts.user_id` are plain UUID values, validated via API calls, not FK constraints. BFF has no database.
+
+| Database | Owner service |
+|---|---|
+| `vbank_users` | user-service |
+| `vbank_accounts` | account-service |
+| `vbank_transactions` | transaction-service |
+| `vbank_logs` | logging-service |
+
+### `vbank_users.users`
+
+| Column | Type | Constraints | Notes |
+|---|---|---|---|
+| `user_id` | UUID | PK | generated server-side |
+| `username` | VARCHAR(50) | UNIQUE, NOT NULL | 409 on duplicate |
+| `email` | VARCHAR(255) | UNIQUE, NOT NULL | 409 on duplicate |
+| `password_hash` | VARCHAR(60) | NOT NULL | BCrypt output is exactly 60 chars; never store plaintext |
+| `first_name` | VARCHAR(100) | NOT NULL | |
+| `last_name` | VARCHAR(100) | NOT NULL | |
+| `created_at` | TIMESTAMPTZ | NOT NULL | |
+
+### `vbank_accounts.accounts`
+
+| Column | Type | Constraints | Notes |
+|---|---|---|---|
+| `account_id` | UUID | PK | |
+| `user_id` | UUID | NOT NULL | logical reference only — no FK (different DB) |
+| `account_number` | VARCHAR(10) | UNIQUE, NOT NULL | 10-digit, generated |
+| `account_type` | VARCHAR(10) | NOT NULL, CHECK in (SAVINGS, CHECKING, SYSTEM) | |
+| `balance` | NUMERIC(19,2) | NOT NULL, CHECK >= 0 | **never FLOAT/DOUBLE** — `BigDecimal` in Java |
+| `status` | VARCHAR(10) | NOT NULL DEFAULT 'ACTIVE', CHECK in (ACTIVE, INACTIVE) | |
+| `last_transaction_at` | TIMESTAMP | NULL | updated by every transfer; drives stale job |
+| `created_at` | TIMESTAMP | NOT NULL DEFAULT now() | |
+
+Indexes: `idx_accounts_user_id (user_id)` for `GET /users/{userId}/accounts`; `idx_accounts_stale (status, last_transaction_at)` for the hourly job.
+
+### `vbank_transactions.transactions`
+
+| Column | Type | Constraints | Notes |
+|---|---|---|---|
+| `transaction_id` | UUID | PK | |
+| `from_account_id` | UUID | NOT NULL | logical reference to accounts |
+| `to_account_id` | UUID | NOT NULL | logical reference to accounts |
+| `amount` | NUMERIC(19,2) | NOT NULL, CHECK > 0 | |
+| `description` | VARCHAR(255) | NULL | |
+| `status` | VARCHAR(10) | NOT NULL, CHECK in (INITIATED, SUCCESS, FAILED) | the two-phase state machine |
+| `timestamp` | TIMESTAMP | NOT NULL DEFAULT now() | |
+
+Indexes: `idx_tx_from (from_account_id)`, `idx_tx_to (to_account_id)` — history query is `WHERE from_account_id = ? OR to_account_id = ? ORDER BY timestamp DESC`.
+
+⚠️ The spec's history response example includes a `deliveryStatus` field (`SENT`/`DELIVERED`) that is never defined anywhere else in the document. Options: (a) add a `delivery_status VARCHAR(10)` column defaulting to `SENT`, or (b) drop the field. **Ask the mentor; record the answer in §11.**
+
+### `vbank_logs.logs` (dump table)
+
+| Column | Type | Constraints | Notes |
+|---|---|---|---|
+| `id` | BIGSERIAL | PK | high-volume append-only → sequence, not UUID |
+| `message` | TEXT | NOT NULL | escaped request/response JSON |
+| `message_type` | VARCHAR(10) | NOT NULL, CHECK in (Request, Response) | |
+| `date_time` | TIMESTAMP | NOT NULL | when the producer generated the log |
+| `created_at` | TIMESTAMP | NOT NULL DEFAULT now() | when the consumer inserted it |
+
+### Operational notes
+
+- **Schema management**: `spring.jpa.hibernate.ddl-auto=update` is acceptable for this project's scope (see §11); switch to `validate` + explicit DDL if the mentor prefers.
+- **docker-compose**: one `postgres:16` container with an init script creating the four databases; each service's `application.yml` points to its own database URL.
+- **Concurrency on transfers**: the debit+credit in account-service runs in one `@Transactional` method; Postgres row locks on the two `UPDATE`s prevent lost updates. Lock accounts in a **consistent order (e.g. by accountId)** to avoid deadlocks when two opposite transfers run concurrently.
+- Money is `NUMERIC(19,2)` / `BigDecimal` everywhere. Floating point for money is a bug, full stop.
+
+---
+
+## 11. Technical decisions
+
+Recorded here rather than in a separate file. Anything that deviates from the spec, or that a reader would otherwise question, belongs in this table.
+
+| Decision | Reasoning |
+|---|---|
+| Java 21 instead of the spec's Java 11 | Mentor-approved. Enables records for DTOs and modern language features. |
+| Spring Boot 4.1.0 | Latest at project start. ⚠️ Starters were renamed: `spring-boot-starter-webmvc` (not `-web`), split `*-test` starters. Translate any tutorial written for Boot 3. |
+| Multi-module Maven with a parent pom | Java and Boot versions declared once instead of copied into five poms. `mvn clean install` at the root builds everything. |
+| Database-per-service in one Postgres container | Preserves the microservice ownership rule (no cross-service table reads) without running four containers. No FK constraints across databases. |
+| `ddl-auto: update` | Acceptable at this scope; avoids hand-maintaining DDL for five services in a month. |
+| `open-in-view: false` | Spring's default keeps a DB session open for the whole request, hurting performance and hiding lazy-loading bugs. |
+| Lombok only on entities (`@Getter`/`@Setter`/`@NoArgsConstructor`) | Removes real boilerplate there. Never `@Data`/`@EqualsAndHashCode`/`@ToString` on entities — they break Hibernate identity semantics. DTOs are records, so Lombok adds nothing. |
+| DTOs are records; entity→DTO mapping via a static `from()` factory | One mapping point per DTO instead of a mapping library. |
+| One `ApiException` carrying its own `HttpStatus` | Avoids a class per error type; a single `build()` method produces the §0 envelope everywhere. |
+| `Instant` fields → `TIMESTAMPTZ` columns | Unambiguous points in time; no timezone confusion when the BFF or scheduled jobs compare timestamps. |
+| `KafkaLogProducer` duplicated per service | A shared library module costs more coordination than it saves for a 1-month, 2-person project. |
+| No Spring Security starter in user-service | Only BCrypt is needed; the full starter would auto-secure every endpoint and require config to undo. |
 
 ---
 

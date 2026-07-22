@@ -1,0 +1,22 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: vbank-postgres
+    environment:
+      POSTGRES_USER: vbank
+      POSTGRES_PASSWORD: vbank
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./init:/docker-entrypoint-initdb.d
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U vbank"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  # kafka + zookeeper added in step 7 of the work plan
+
+volumes:
+  pgdata:
