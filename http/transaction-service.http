@@ -126,7 +126,7 @@ Content-Type: application/json
 POST http://localhost:8083/transactions/transfer/initiation
 Content-Type: application/json
 
-{ "fromAccountId": "{{fromAccountId}}"}
+{ "fromAccountId": "{{fromAccountId}}", }
 
 > {%
     client.test("400", () => client.assert(response.status === 400));
