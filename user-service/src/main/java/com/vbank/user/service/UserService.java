@@ -1,7 +1,7 @@
 package com.vbank.user.service;
 
 import com.vbank.user.dto.*;
-import com.vbank.user.exception.*;
+import com.vbank.user.exception.ApiException;
 import com.vbank.user.model.User;
 import com.vbank.user.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -22,7 +22,7 @@ public class UserService {
 
     public RegisterResponse registerUser(RegisterRequest request) {
         if (userRepository.existsByUsernameOrEmail(request.username(), request.email())) {
-            throw new ConflictException("Username or email already exists.");
+            throw new ApiException(org.springframework.http.HttpStatus.CONFLICT, "Username or email already exists.");
         }
 
         User user = new User();
@@ -43,10 +43,10 @@ public class UserService {
 
     public LoginResponse authenticateUser(LoginRequest request) {
         User user = userRepository.findByUsername(request.username())
-                .orElseThrow(() -> new UnauthorizedException("Invalid username or password."));
+                .orElseThrow(() -> new ApiException(org.springframework.http.HttpStatus.UNAUTHORIZED, "Invalid username or password."));
 
         if (!passwordEncoder.matches(request.password(), user.getPassword())) {
-            throw new UnauthorizedException("Invalid username or password.");
+            throw new ApiException(org.springframework.http.HttpStatus.UNAUTHORIZED, "Invalid username or password.");
         }
 
         return new LoginResponse(user.getUserId(), user.getUsername());
@@ -54,7 +54,7 @@ public class UserService {
 
     public ProfileResponse getUserProfile(UUID userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("User with ID " + userId + " not found."));
+                .orElseThrow(() -> new ApiException(org.springframework.http.HttpStatus.NOT_FOUND, "User with ID " + userId + " not found."));
 
         return new ProfileResponse(
                 user.getUserId(),
