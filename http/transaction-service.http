@@ -1,0 +1,316 @@
+### Create a source account (account-service)
+POST http://localhost:8082/accounts
+Content-Type: application/json
+
+{
+  "userId": "11111111-1111-1111-1111-111111111111",
+  "accountType": "SAVINGS",
+  "initialBalance": 500.00
+}
+
+> {%
+    client.test("201 created", () => client.assert(response.status === 201));
+    client.global.set("fromAccountId", response.body.accountId);
+%}
+
+### Create a destination account (account-service)
+POST http://localhost:8082/accounts
+Content-Type: application/json
+
+{
+  "userId": "11111111-1111-1111-1111-111111111111",
+  "accountType": "CHECKING",
+  "initialBalance": 50.00
+}
+
+> {%
+    client.test("201 created", () => client.assert(response.status === 201));
+    client.global.set("toAccountId", response.body.accountId);
+%}
+
+### Initiate a transfer — happy path
+POST http://localhost:8083/transactions/transfer/initiation
+Content-Type: application/json
+
+{
+  "fromAccountId": "{{fromAccountId}}",
+  "toAccountId": "{{toAccountId}}",
+  "amount": 30.00,
+  "description": "Transfer to checking account"
+}
+
+> {%
+    client.test("200 OK", () => client.assert(response.status === 200));
+    client.test("status is Initiated", () => client.assert(response.body.status === "Initiated"));
+    client.test("transactionId returned", () => client.assert(response.body.transactionId !== undefined));
+    client.test("timestamp is ISO-8601", () => client.assert(/^\d{4}-\d{2}-\d{2}T/.test(response.body.timestamp)));
+    client.global.set("transactionId", response.body.transactionId);
+%}
+
+### Unknown from-account → 400
+POST http://localhost:8083/transactions/transfer/initiation
+Content-Type: application/json
+
+{
+  "fromAccountId": "99999999-9999-9999-9999-999999999999",
+  "toAccountId": "{{toAccountId}}",
+  "amount": 10.00,
+  "description": "Bad source"
+}
+
+> {%
+    client.test("400", () => client.assert(response.status === 400));
+    client.test("envelope", () => client.assert(response.body.error === "Bad Request"));
+%}
+
+### Unknown to-account → 400
+POST http://localhost:8083/transactions/transfer/initiation
+Content-Type: application/json
+
+{
+  "fromAccountId": "{{fromAccountId}}",
+  "toAccountId": "99999999-9999-9999-9999-999999999999",
+  "amount": 10.00,
+  "description": "Bad destination"
+}
+
+> {%
+    client.test("400", () => client.assert(response.status === 400));
+%}
+
+### Insufficient funds → 400
+POST http://localhost:8083/transactions/transfer/initiation
+Content-Type: application/json
+
+{
+  "fromAccountId": "{{fromAccountId}}",
+  "toAccountId": "{{toAccountId}}",
+  "amount": 999999.00,
+  "description": "Too much"
+}
+
+> {%
+    client.test("400", () => client.assert(response.status === 400));
+    client.test("message", () => client.assert(response.body.message === "Insufficient funds."));
+%}
+
+### Missing required field → 400
+POST http://localhost:8083/transactions/transfer/initiation
+Content-Type: application/json
+
+{
+  "toAccountId": "{{toAccountId}}",
+  "amount": 10.00
+}
+
+> {%
+    client.test("400", () => client.assert(response.status === 400));
+%}
+
+### Non-positive amount → 400
+POST http://localhost:8083/transactions/transfer/initiation
+Content-Type: application/json
+
+{
+  "fromAccountId": "{{fromAccountId}}",
+  "toAccountId": "{{toAccountId}}",
+  "amount": -5.00,
+  "description": "Negative"
+}
+
+> {%
+    client.test("400", () => client.assert(response.status === 400));
+%}
+
+### Malformed JSON → 400
+POST http://localhost:8083/transactions/transfer/initiation
+Content-Type: application/json
+
+{ "fromAccountId": "{{fromAccountId}}", }
+
+> {%
+    client.test("400", () => client.assert(response.status === 400));
+%}
+
+### Unmapped route → 404
+GET http://localhost:8083/transactions/nope
+
+> {%
+    client.test("404", () => client.assert(response.status === 404));
+%}
+
+### Wrong method → 405
+GET http://localhost:8083/transactions/transfer/initiation
+
+> {%
+    client.test("405", () => client.assert(response.status === 405));
+%}
+
+### Same account on both sides → 400
+POST http://localhost:8083/transactions/transfer/initiation
+Content-Type: application/json
+
+{
+  "fromAccountId": "{{fromAccountId}}",
+  "toAccountId": "{{fromAccountId}}",
+  "amount": 10.00,
+  "description": "Self transfer"
+}
+
+> {%
+    client.test("400", () => client.assert(response.status === 400));
+    client.test("message", () => client.assert(response.body.message === "Cannot transfer to the same account."));
+%}
+
+### Execute the initiated transfer — happy path
+POST http://localhost:8083/transactions/transfer/execution
+Content-Type: application/json
+
+{ "transactionId": "{{transactionId}}" }
+
+> {%
+    client.test("200 OK", () => client.assert(response.status === 200));
+    client.test("status is Success", () => client.assert(response.body.status === "Success"));
+    client.test("same transactionId", () => client.assert(response.body.transactionId === client.global.get("transactionId")));
+%}
+
+### Balance moved on the source account
+GET http://localhost:8082/accounts/{{fromAccountId}}
+
+> {%
+    client.test("200 OK", () => client.assert(response.status === 200));
+    client.test("debited by 30", () => client.assert(response.body.balance === 470.00));
+%}
+
+### Balance moved on the destination account
+GET http://localhost:8082/accounts/{{toAccountId}}
+
+> {%
+    client.test("credited by 30", () => client.assert(response.body.balance === 80.00));
+%}
+
+### Re-executing the same transaction → 400
+POST http://localhost:8083/transactions/transfer/execution
+Content-Type: application/json
+
+{ "transactionId": "{{transactionId}}" }
+
+> {%
+    client.test("400", () => client.assert(response.status === 400));
+    client.test("message", () => client.assert(response.body.message === "Transaction has already been executed."));
+%}
+
+### Unknown transactionId → 400
+POST http://localhost:8083/transactions/transfer/execution
+Content-Type: application/json
+
+{ "transactionId": "99999999-9999-9999-9999-999999999999" }
+
+> {%
+    client.test("400", () => client.assert(response.status === 400));
+%}
+
+### Missing transactionId → 400
+POST http://localhost:8083/transactions/transfer/execution
+Content-Type: application/json
+
+{}
+
+> {%
+    client.test("400", () => client.assert(response.status === 400));
+%}
+
+### Initiate then drain the source, so execution fails
+POST http://localhost:8083/transactions/transfer/initiation
+Content-Type: application/json
+
+{
+  "fromAccountId": "{{fromAccountId}}",
+  "toAccountId": "{{toAccountId}}",
+  "amount": 400.00,
+  "description": "Will fail after draining"
+}
+
+> {%
+    client.test("200 OK", () => client.assert(response.status === 200));
+    client.global.set("doomedTransactionId", response.body.transactionId);
+%}
+
+### Drain the source account directly
+PUT http://localhost:8082/accounts/transfer
+Content-Type: application/json
+
+{
+  "fromAccountId": "{{fromAccountId}}",
+  "toAccountId": "{{toAccountId}}",
+  "amount": 470.00
+}
+
+> {%
+    client.test("200 OK", () => client.assert(response.status === 200));
+%}
+
+### Execution now fails on insufficient funds → 400
+POST http://localhost:8083/transactions/transfer/execution
+Content-Type: application/json
+
+{ "transactionId": "{{doomedTransactionId}}" }
+
+> {%
+    client.test("400", () => client.assert(response.status === 400));
+    client.test("reason propagated from account-service", () => client.assert(response.body.message.includes("nsufficient")));
+%}
+
+### The failed transaction is now FAILED, not retryable
+POST http://localhost:8083/transactions/transfer/execution
+Content-Type: application/json
+
+{ "transactionId": "{{doomedTransactionId}}" }
+
+> {%
+    client.test("400", () => client.assert(response.status === 400));
+    client.test("message", () => client.assert(response.body.message === "Transaction has already failed."));
+%}
+
+### History for the source account
+GET http://localhost:8083/accounts/{{fromAccountId}}/transactions
+
+> {%
+    client.test("200 OK", () => client.assert(response.status === 200));
+    client.test("array returned", () => client.assert(Array.isArray(response.body)));
+    client.test("has entries", () => client.assert(response.body.length > 0));
+    client.test("newest first", () => {
+        for (let i = 1; i < response.body.length; i++) {
+            client.assert(response.body[i - 1].timestamp >= response.body[i].timestamp);
+        }
+    });
+    client.test("contract fields present", () => {
+        const t = response.body[0];
+        client.assert(t.transactionId !== undefined && t.fromAccountId !== undefined
+            && t.toAccountId !== undefined && t.amount !== undefined
+            && t.timestamp !== undefined && t.deliveryStatus === "SENT");
+    });
+%}
+
+### History includes incoming transactions too
+GET http://localhost:8083/accounts/{{toAccountId}}/transactions
+
+> {%
+    client.test("200 OK", () => client.assert(response.status === 200));
+    client.test("has entries", () => client.assert(response.body.length > 0));
+%}
+
+### Account with no transactions → 404
+GET http://localhost:8083/accounts/99999999-9999-9999-9999-999999999999/transactions
+
+> {%
+    client.test("404", () => client.assert(response.status === 404));
+    client.test("envelope", () => client.assert(response.body.error === "Not Found"));
+%}
+
+### Malformed accountId → 400
+GET http://localhost:8083/accounts/not-a-uuid/transactions
+
+> {%
+    client.test("400", () => client.assert(response.status === 400));
+%}
