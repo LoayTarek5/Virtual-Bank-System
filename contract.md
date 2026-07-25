@@ -42,7 +42,7 @@
 
 ---
 
-## 1. User Service (owner: Friend)
+## 1. User Service (owner: Ahmed)
 
 ### POST /users/register
 Registers a new user. Password stored **hashed (BCrypt)** — never plaintext.
@@ -247,49 +247,62 @@ Responses:
 
 ---
 
-## 4. BFF Service (owner: Friend)
+## 4. BFF Service (owner: Ahmed)
 
-### GET /bff/dashboard/{userId}
-Aggregation. Internal calls (WebClient):
-1. `GET user-service:8081/users/{userId}/profile`
-2. `GET account-service:8082/users/{userId}/accounts`
-3. For each account (in parallel): `GET transaction-service:8083/accounts/{accountId}/transactions`
+### BFF Role: Middleware/Passthrough Gateway
+As per mentor guidance, the BFF does **not** perform data aggregation or orchestration. It acts as a lightweight HTTP middleware that forwards requests to the underlying microservices.
 
-Responses:
-- `200 OK`
-```json
-{
-  "userId": "a1b2c3d4-e5f6-7890-1234-567890abcdef",
-  "username": "john.doe",
-  "email": "john.doe@example.com",
-  "firstName": "John",
-  "lastName": "Doe",
-  "accounts": [
-    {
-      "accountId": "f1e2d3c4-b5a6-9876-5432-10fedcba9876",
-      "accountNumber": "1234567890",
-      "accountType": "SAVINGS",
-      "balance": 120.00,
-      "transactions": [
-        {
-          "transactionId": "t1r2a3n4-s5a6-7890-1234-567890abcdef",
-          "amount": 50.00,
-          "toAccountId": "g7h8i9j0-k1l2-3456-7890-abcdef123456",
-          "description": "Cash deposit",
-          "timestamp": "2025-06-30T10:05:00Z"
-        }
-      ]
-    }
-  ]
-}
-```
-- Account with no transactions → `"transactions": []` (BFF converts downstream 404 into an empty list).
-- `404 Not Found` — user does not exist.
-- `500 Internal Server Error` — a downstream service failed.
+**Key principle:** The BFF is stateless and does no business logic. It only:
+1. Receives a request from the gateway/frontend.
+2. Extracts the `APP-NAME` header (set by the external API gateway).
+3. Adds the `APP-NAME` header to the forwarded request.
+4. Calls the appropriate microservice endpoint using RestClient.
+5. Returns the response as-is to the client.
+
+### BFF Endpoints (Passthrough)
+
+| External Request | BFF endpoint | Forwarded to | Notes |
+|---|---|---|---|
+| `POST /register` | N/A (routes to user-service via gateway) | user-service `POST /users/register` | No BFF involvement; gateway routes directly |
+| `POST /login` | N/A | user-service `POST /users/login` | No BFF involvement; gateway routes directly |
+| `GET /users/{userId}/profile` | `GET /bff/users/{userId}/profile` | user-service `GET /users/{userId}/profile` | Adds `APP-NAME` header |
+| `GET /users/{userId}/accounts` | `GET /bff/users/{userId}/accounts` | account-service `GET /users/{userId}/accounts` | Adds `APP-NAME` header |
+| `GET /accounts/{accountId}` | `GET /bff/accounts/{accountId}` | account-service `GET /accounts/{accountId}` | Adds `APP-NAME` header |
+| `POST /accounts` | `POST /bff/accounts` | account-service `POST /accounts` | Adds `APP-NAME` header |
+| `PUT /accounts/transfer` | `PUT /bff/accounts/transfer` | account-service `PUT /accounts/transfer` | Adds `APP-NAME` header |
+| `GET /accounts/{accountId}/transactions` | `GET /bff/accounts/{accountId}/transactions` | transaction-service `GET /accounts/{accountId}/transactions` | Adds `APP-NAME` header |
+| `POST /transactions/transfer/initiation` | `POST /bff/transactions/transfer/initiation` | transaction-service `POST /transactions/transfer/initiation` | Adds `APP-NAME` header |
+| `POST /transactions/transfer/execution` | `POST /bff/transactions/transfer/execution` | transaction-service `POST /transactions/transfer/execution` | Adds `APP-NAME` header |
+
+### Dashboard / UI Composition
+**No BFF aggregation endpoint.** The frontend is responsible for assembling dashboards by making multiple independent API calls:
+1. Call `GET /bff/users/{userId}/profile`
+2. Call `GET /bff/users/{userId}/accounts`
+3. For each account returned, call `GET /bff/accounts/{accountId}/transactions`
+
+The frontend then combines these responses into a dashboard view. This distributes coupling to the client, which is acceptable for a single frontend.
+
+### BFF Implementation Notes
+- **No database**, no repository, no entity models.
+- **RestClient-based forwarding**: one method per endpoint, each follows the same pattern:
+  ```java
+  @GetMapping("/users/{userId}/profile")
+  public ProfileResponse getUserProfile(@PathVariable String userId,
+                                        @RequestHeader("APP-NAME") String appName) {
+    return restClient.get()
+      .uri(userServiceUrl + "/users/{userId}/profile", userId)
+      .header("APP-NAME", appName)
+      .retrieve()
+      .body(ProfileResponse.class);
+  }
+  ```
+- **Error handling**: If a downstream service returns an error, BFF forwards the error response as-is (same status, same error envelope from §0).
+- **No request/response transformation**: Pass through all bodies unmodified.
+- **Logging**: Each request/response logged to Kafka (same as other services).
 
 ---
 
-## 5. Kafka logging contract (producer: everyone; consumer: Friend)
+## 5. Kafka logging contract (producer: everyone; consumer: Ahmed)
 
 - **Topic:** `logging` (single topic, all services).
 - Every microservice produces **two messages per handled request**: one `Request`, one `Response`, sent just before returning the response.
@@ -311,17 +324,19 @@ Message format (JSON string value):
 
 ## 6. Gateway route map (owners: both, week 4)
 
-| API | External resource | Backend endpoint |
-|---|---|---|
-| Register | `POST /register` | user-service `POST /users/register` |
-| Login | `POST /login` | user-service `POST /users/login` |
-| Dashboard | `GET /dashboard/{userId}` | bff `GET /bff/dashboard/{userId}` |
-| Transactions | `POST /initiation`, `POST /execution` | transaction-service `POST /transactions/transfer/initiation`, `.../execution` |
-| **vbank** (API product) | `/vbank/*` | bundles Login, Dashboard, Transactions |
+| API | External resource | Backend endpoint | Notes |
+|---|---|---|---|
+| Register | `POST /register` | user-service `POST /users/register` | Direct gateway→user-service |
+| Login | `POST /login` | user-service `POST /users/login` | Direct gateway→user-service |
+| Profile | `GET /profile/{userId}` | BFF `GET /bff/users/{userId}/profile` | BFF forwards to user-service |
+| Accounts | `GET /accounts/{userId}`, `POST /accounts`, `PUT /transfer` | BFF `GET /bff/users/{userId}/accounts`, etc. | BFF forwards to account-service |
+| Transactions | `POST /transactions/transfer/initiation`, `POST /transactions/transfer/execution` | BFF `POST /bff/transactions/transfer/initiation`, etc. | BFF forwards to transaction-service |
+| **vbank** (API product) | `/vbank/*` | bundles all above endpoints | Wrapped under `/vbank` prefix |
 
 - Security: OAuth2 + API key on all APIs.
 - Applications: `vbank portal`, `vbank mobile`.
-- Gateway injects header `APP-NAME: PORTAL | MOBILE` on every forwarded request.
+- Gateway injects header `APP-NAME: PORTAL | MOBILE` on every forwarded request (to BFF or microservices).
+- **Dashboard assembly:** No aggregation endpoint. Frontend is responsible for calling multiple endpoints and combining the responses (profile + accounts + transactions per account).
 
 ---
 
@@ -345,16 +360,15 @@ Message format (JSON string value):
 9. **Stale-account scheduled job** (`@Scheduled`, hourly, 24h rule).
 10. **Hardening**: edge cases vs. this contract, Postman collection entries for all money-path requests.
 
-### Friend — the user-facing path (in order)
+### Ahmed — the user-facing path (in order)
 1. **User Service — register**: entity + BCrypt hashing + `POST /users/register` with 409 handling. Test with Postman.
 2. **User Service — login + profile**: `POST /users/login` (401 on bad credentials), `GET /users/{userId}/profile`.
-3. **BFF — skeleton + profile passthrough**: `GET /bff/dashboard/{userId}` calling user-service only.
-4. **BFF — accounts aggregation**: add account-service call, merge into response (Loay's step 2 is ready by now).
-5. **BFF — transactions fan-out**: parallel per-account calls to transaction-service (WebClient or RestClient + virtual threads); downstream 404 → `"transactions": []`.
-6. **BFF — error handling**: user 404 passthrough, downstream failure → 500 envelope.
-7. **Logging Service**: `@KafkaListener` consumer on `logging` topic + dump table insert (schema in §5).
-8. **Kafka producers** in user-service and bff-service.
-9. **Hardening**: Postman collection entries for register/login/dashboard, edge cases vs. this contract.
+3. **BFF — Map the Network & HTTP Engine**: Put target service URLs in `application.yml` and configure a `RestClient` setup file.
+4. **BFF — Front Desk Controllers**: Create endpoints (e.g. `/bff/users/{userId}/profile`) that match what the frontend expects.
+5. **BFF — Proxy Logic (Delivery Driver)**: Use the `RestClient` inside your controllers to forward the request to the target service and return the response exactly as-is, ensuring downstream errors (404, 500) are passed cleanly.
+6. **Logging Service**: `@KafkaListener` consumer on `logging` topic + dump table insert (schema in §5).
+7. **Kafka producers** in user-service and bff-service.
+8. **Hardening**: Postman collection entries for register/login and routed endpoints, edge cases vs. this contract.
 
 ### Both together (Week 4)
 1. Install WSO2 API Manager; walk through Publisher → Dev Portal → Key Manager once with a hello-world API.
@@ -387,10 +401,9 @@ Message format (JSON string value):
 - **Spring `@Scheduled`**: fixedRate vs cron, and how the hourly stale-account query works.
 - **Inter-service HTTP calls from a service** (transaction → account): RestClient/WebClient, timeout and error mapping.
 
-### Friend-specific
+### Ahmed-specific
 - **Password security**: BCrypt (why hashing + salt, never plaintext, never reversible), Spring Security's `PasswordEncoder` (used standalone, no full Spring Security needed).
-- **BFF pattern**: why it exists, aggregation vs orchestration, shaping responses for the frontend.
-- **Concurrent fan-out calls**: `WebClient` + `Mono.zip`/`Flux.merge`, or `RestClient` + virtual threads / `CompletableFuture.allOf` — pick one and understand its error handling.
+- **BFF as a Gateway (RestClient approach)**: Abstracting URLs in `application.yml`, configuring `RestClient` beans, and building proxy controllers to act as a pure "delivery driver" without data aggregation.
 - **Kafka consumer details**: deserialization, error handling in `@KafkaListener`, what happens when the consumer is down (offset catch-up).
 
 ---
@@ -413,7 +426,7 @@ vbank/                                  # monorepo root
 ├── postman/
 │   └── vbank.postman_collection.json   # shared regression collection
 │
-├── user-service/                       # :8081 (Friend)
+├── user-service/                       # :8081 (Ahmed)
 │   ├── pom.xml
 │   └── src/
 │       ├── main/
@@ -457,7 +470,7 @@ vbank/                                  # monorepo root
 │       └── client/
 │           └── AccountClient.java      # RestClient wrapper for account-service calls
 │
-├── bff-service/                        # :8084 (Friend) — same layout, com.vbank.bff
+├── bff-service/                        # :8084 (Ahmed) — same layout, com.vbank.bff
 │   └── src/main/java/com/vbank/bff/
 │       ├── controller/ service/ dto/ exception/ logging/   # no repository/model — BFF has no DB
 │       └── client/
@@ -465,7 +478,7 @@ vbank/                                  # monorepo root
 │           ├── AccountClient.java
 │           └── TransactionClient.java  # fan-out lives in service layer using these
 │
-└── logging-service/                    # :8085 (Friend) — same layout, com.vbank.logging
+└── logging-service/                    # :8085 (Ahmed) — same layout, com.vbank.logging
     └── src/main/java/com/vbank/logging/
         ├── consumer/
         │   └── LogConsumer.java        # @KafkaListener on "logging" topic
@@ -585,4 +598,5 @@ Recorded here rather than in a separate file. Anything that deviates from the sp
 
 | Date | Change | Agreed by |
 |---|---|---|
-| <date> | Initial version from spec | Loay + <friend> |
+| 2025-07-24 | Initial version from spec | Loay + Ahmed |
+| 2025-07-24 | **Mentor guidance applied:** BFF simplified to passthrough middleware. Removed aggregation, removed dashboard endpoint, frontend responsible for multi-call composition. Updated §4 with explicit endpoint table and RestClient pattern. Updated §6 gateway route map to clarify BFF's transparent role. | Mentor + Loay + Ahmed |
