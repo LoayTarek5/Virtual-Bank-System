@@ -1,0 +1,14 @@
+server:
+  port: 8084
+
+spring:
+  application:
+    name: bff-service
+  kafka:
+    bootstrap-servers: localhost:9092
+
+vbank:
+  services:
+    user: http://localhost:8081
+    account: http://localhost:8082
+    transaction: http://localhost:8083
