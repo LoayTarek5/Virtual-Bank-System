@@ -23,7 +23,7 @@
     <modules>
         <module>user-service</module>
         <module>account-service</module>
-<!--        <module>transaction-service</module>-->
+        <module>transaction-service</module>
         <module>bff-service</module>
 <!--        <module>logging-service</module>-->
     </modules>
