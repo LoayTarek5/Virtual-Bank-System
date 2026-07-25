@@ -95,10 +95,13 @@ public class BffController {
             request.body(body);
         }
 
-        return request.exchange((clientRequest, clientResponse) -> 
-            ResponseEntity.status(clientResponse.getStatusCode())
-                    .headers(clientResponse.getHeaders())
-                    .body(clientResponse.getBody().readAllBytes())
-        );
+        return request.exchange((clientRequest, clientResponse) -> {
+            org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
+            headers.putAll(clientResponse.getHeaders());
+            headers.remove(org.springframework.http.HttpHeaders.TRANSFER_ENCODING);
+            return ResponseEntity.status(clientResponse.getStatusCode())
+                    .headers(headers)
+                    .body(clientResponse.getBody().readAllBytes());
+        });
     }
 }
