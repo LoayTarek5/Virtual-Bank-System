@@ -44,6 +44,12 @@
 			<artifactId>jackson-datatype-jsr310</artifactId>
 		</dependency>
 
+		<!-- Web (keeps the application alive on port 8085) -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-webmvc</artifactId>
+		</dependency>
+
 		<!-- Testing -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
