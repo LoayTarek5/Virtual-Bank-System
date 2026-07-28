@@ -1,0 +1,43 @@
+components:
+  schemas:
+    ProfileResponse:
+      properties:
+        email:
+          format: email
+          type: string
+        firstName:
+          type: string
+        lastName:
+          type: string
+        userId:
+          format: uuid
+          type: string
+        username:
+          type: string
+      type: object
+info:
+  description: User profile retrieval for the vbank system.
+  title: ProfileAPI
+  version: 1.0.0
+openapi: 3.0.3
+paths:
+  /users/{userId}/profile:
+    get:
+      operationId: getUserProfile
+      parameters:
+      - in: path
+        name: userId
+        required: true
+        schema:
+          format: uuid
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProfileResponse'
+          description: Profile retrieved
+        "404":
+          description: User not found
+      summary: Retrieve a user's profile
