@@ -1,4 +1,4 @@
-package com.vbank.account.logging;
+package com.vbank.transaction.logging;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
