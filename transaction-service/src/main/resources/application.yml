@@ -16,6 +16,13 @@ spring:
     client:
       connect-timeout: 2s
       read-timeout: 5s
+  kafka:
+    bootstrap-servers: localhost:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+      properties:
+        max.block.ms: 2000
 
 services:
   account:
