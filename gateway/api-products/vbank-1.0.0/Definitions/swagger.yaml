@@ -1,0 +1,492 @@
+openapi: 3.0.1
+info:
+  title: vbank
+  version: 1.0.0
+servers:
+ -
+  url: /
+security:
+ -
+  default: []
+paths:
+  /users/{userId}/profile:
+    get:
+      summary: Retrieve a user's profile
+      operationId: getUserProfile
+      parameters:
+       -
+        name: userId
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+          format: uuid
+      responses:
+        "200":
+          description: Profile retrieved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProfileResponse"
+        "404":
+          description: User not found
+      security:
+       -
+        default: []
+      x-auth-type: Application & Application User
+      x-throttling-tier: Unlimited
+  /accounts/{accountId}/transactions:
+    get:
+      summary: Retrieve transaction history for an account
+      operationId: getTransactionHistory
+      parameters:
+       -
+        name: accountId
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+          format: uuid
+      responses:
+        "200":
+          description: History retrieved
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TransactionHistoryResponse"
+        "404":
+          description: No transactions found for account
+      security:
+       -
+        default: []
+      x-auth-type: Application & Application User
+      x-throttling-tier: Unlimited
+  /transactions/transfer/execution:
+    post:
+      summary: Execute an initiated transfer
+      operationId: executeTransfer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ExecutionRequest"
+        required: true
+      responses:
+        "200":
+          description: Transfer executed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TransactionResponse"
+        "400":
+          description: "Transaction not found, already executed, or insufficient funds"
+      security:
+       -
+        default: []
+      x-auth-type: Application & Application User
+      x-throttling-tier: Unlimited
+  /transactions/transfer/initiation:
+    post:
+      summary: Initiate a fund transfer
+      operationId: initiateTransfer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/InitiationRequest"
+        required: true
+      responses:
+        "200":
+          description: Transfer initiated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TransactionResponse"
+        "400":
+          description: Invalid account ID or insufficient funds
+      security:
+       -
+        default: []
+      x-auth-type: Application & Application User
+      x-throttling-tier: Unlimited
+  /accounts:
+    post:
+      summary: Create a new bank account
+      operationId: createAccount
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateAccountRequest"
+        required: true
+      responses:
+        "201":
+          description: Account created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreateAccountResponse"
+        "400":
+          description: Invalid account type or initial balance
+      security:
+       -
+        default: []
+      x-auth-type: Application & Application User
+      x-throttling-tier: Unlimited
+  /accounts/{accountId}:
+    get:
+      summary: Retrieve a single account
+      operationId: getAccount
+      parameters:
+       -
+        name: accountId
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+          format: uuid
+      responses:
+        "200":
+          description: Account retrieved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AccountResponse"
+        "404":
+          description: Account not found
+      security:
+       -
+        default: []
+      x-auth-type: Application & Application User
+      x-throttling-tier: Unlimited
+  /accounts/transfer:
+    put:
+      summary: Transfer funds between accounts
+      operationId: transfer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TransferRequest"
+        required: true
+      responses:
+        "200":
+          description: Transfer completed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+        "400":
+          description: "Invalid account ID, insufficient funds, or inactive account"
+      security:
+       -
+        default: []
+      x-auth-type: Application & Application User
+      x-throttling-tier: Unlimited
+  /users/{userId}/accounts:
+    get:
+      summary: List all accounts for a user
+      operationId: getUserAccounts
+      parameters:
+       -
+        name: userId
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+          format: uuid
+      responses:
+        "200":
+          description: Accounts retrieved
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AccountResponse"
+        "404":
+          description: No accounts found for user
+      security:
+       -
+        default: []
+      x-auth-type: Application & Application User
+      x-throttling-tier: Unlimited
+  /users/login:
+    post:
+      summary: Authenticate a user
+      operationId: loginUser
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+        required: true
+      responses:
+        "200":
+          description: Authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoginResponse"
+        "400":
+          description: Validation error
+        "401":
+          description: Invalid username or password
+      security:
+       -
+        default: []
+      x-auth-type: Application & Application User
+      x-throttling-tier: Unlimited
+  /users/register:
+    post:
+      summary: Register a new user
+      operationId: registerUser
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterRequest"
+        required: true
+      responses:
+        "201":
+          description: User registered successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RegisterResponse"
+        "400":
+          description: Validation error
+        "409":
+          description: Username or email already exists
+      security:
+       -
+        default: []
+      x-auth-type: Application & Application User
+      x-throttling-tier: Unlimited
+components:
+  schemas:
+    CreateAccountRequest:
+      required:
+       - accountType
+       - initialBalance
+       - userId
+      type: object
+      properties:
+        accountType:
+          type: string
+          enum:
+           - SAVINGS
+           - CHECKING
+        initialBalance:
+          type: number
+          format: double
+          example: 100
+        userId:
+          type: string
+          format: uuid
+    CreateAccountResponse:
+      type: object
+      properties:
+        accountId:
+          type: string
+          format: uuid
+        accountNumber:
+          type: string
+        message:
+          type: string
+    MessageResponse:
+      type: object
+      properties:
+        message:
+          type: string
+    AccountResponse:
+      type: object
+      properties:
+        accountId:
+          type: string
+          format: uuid
+        accountNumber:
+          type: string
+        accountType:
+          type: string
+          enum:
+           - SAVINGS
+           - CHECKING
+        balance:
+          type: number
+          format: double
+        status:
+          type: string
+          enum:
+           - ACTIVE
+           - INACTIVE
+    TransferRequest:
+      required:
+       - amount
+       - fromAccountId
+       - toAccountId
+      type: object
+      properties:
+        amount:
+          type: number
+          format: double
+          example: 30
+        fromAccountId:
+          type: string
+          format: uuid
+        toAccountId:
+          type: string
+          format: uuid
+    LoginResponse:
+      type: object
+      properties:
+        userId:
+          type: string
+          format: uuid
+        username:
+          type: string
+    LoginRequest:
+      required:
+       - password
+       - username
+      type: object
+      properties:
+        password:
+          type: string
+          format: password
+          example: securePassword123
+        username:
+          type: string
+          example: john.doe
+    ProfileResponse:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+        firstName:
+          type: string
+        lastName:
+          type: string
+        userId:
+          type: string
+          format: uuid
+        username:
+          type: string
+    TransactionHistoryResponse:
+      type: object
+      properties:
+        amount:
+          type: number
+          format: double
+        deliveryStatus:
+          type: string
+          example: SENT
+        description:
+          type: string
+        fromAccountId:
+          type: string
+          format: uuid
+        timestamp:
+          type: string
+          format: date-time
+        toAccountId:
+          type: string
+          format: uuid
+        transactionId:
+          type: string
+          format: uuid
+    TransactionResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: Initiated
+        timestamp:
+          type: string
+          format: date-time
+        transactionId:
+          type: string
+          format: uuid
+    ExecutionRequest:
+      required:
+       - transactionId
+      type: object
+      properties:
+        transactionId:
+          type: string
+          format: uuid
+    InitiationRequest:
+      required:
+       - amount
+       - fromAccountId
+       - toAccountId
+      type: object
+      properties:
+        amount:
+          type: number
+          format: double
+          example: 30
+        description:
+          type: string
+          example: Transfer to checking account
+        fromAccountId:
+          type: string
+          format: uuid
+        toAccountId:
+          type: string
+          format: uuid
+    RegisterRequest:
+      required:
+       - email
+       - firstName
+       - lastName
+       - password
+       - username
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          example: john.doe@example.com
+        firstName:
+          type: string
+          example: John
+        lastName:
+          type: string
+          example: Doe
+        password:
+          type: string
+          format: password
+          example: securePassword123
+        username:
+          type: string
+          example: john.doe
+    RegisterResponse:
+      type: object
+      properties:
+        message:
+          type: string
+        userId:
+          type: string
+          format: uuid
+        username:
+          type: string
+  securitySchemes:
+    default:
+      type: oauth2
+      flows:
+        implicit:
+          authorizationUrl: https://test.com
+          scopes: {}
+          x-scopes-bindings: {}
