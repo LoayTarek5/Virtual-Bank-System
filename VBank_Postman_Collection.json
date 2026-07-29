@@ -1,0 +1,436 @@
+{
+  "info": {
+    "name": "VBank API Postman Collection",
+    "description": "Postman Collection for VBank Microservices and WSO2 Gateway",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "gateway_url",
+      "value": "http://localhost:8280",
+      "type": "string"
+    },
+    {
+      "key": "user_service_url",
+      "value": "http://localhost:8081",
+      "type": "string"
+    },
+    {
+      "key": "bff_service_url",
+      "value": "http://localhost:8084/bff",
+      "type": "string"
+    },
+    {
+      "key": "userId",
+      "value": "12345678-1234-1234-1234-123456789012",
+      "type": "string"
+    },
+    {
+      "key": "accountId",
+      "value": "87654321-4321-4321-4321-210987654321",
+      "type": "string"
+    },
+    {
+      "key": "toAccountId",
+      "value": "11111111-2222-3333-4444-555555555555",
+      "type": "string"
+    },
+    {
+      "key": "transactionId",
+      "value": "99999999-8888-7777-6666-555555555555",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "WSO2 Gateway Requests",
+      "description": "Requests routed through the WSO2 API Gateway",
+      "item": [
+        {
+          "name": "Auth API",
+          "item": [
+            {
+              "name": "Register User",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"username\": \"testuser\",\n  \"password\": \"password123\",\n  \"email\": \"testuser@example.com\",\n  \"firstName\": \"Test\",\n  \"lastName\": \"User\"\n}"
+                },
+                "url": {
+                  "raw": "{{gateway_url}}/register/1.0.0/users/register",
+                  "host": ["{{gateway_url}}"],
+                  "path": ["register", "1.0.0", "users", "register"]
+                }
+              }
+            },
+            {
+              "name": "Login User",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"username\": \"testuser\",\n  \"password\": \"password123\"\n}"
+                },
+                "url": {
+                  "raw": "{{gateway_url}}/login/1.0.0/users/login",
+                  "host": ["{{gateway_url}}"],
+                  "path": ["login", "1.0.0", "users", "login"]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Profile API",
+          "item": [
+            {
+              "name": "Get User Profile",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{gateway_url}}/profile/1.0.0/users/{{userId}}/profile",
+                  "host": ["{{gateway_url}}"],
+                  "path": ["profile", "1.0.0", "users", "{{userId}}", "profile"]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Accounts API",
+          "item": [
+            {
+              "name": "Create Account",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"userId\": \"{{userId}}\",\n  \"accountType\": \"SAVINGS\",\n  \"initialBalance\": 100.0\n}"
+                },
+                "url": {
+                  "raw": "{{gateway_url}}/accounts/1.0.0/accounts",
+                  "host": ["{{gateway_url}}"],
+                  "path": ["accounts", "1.0.0", "accounts"]
+                }
+              }
+            },
+            {
+              "name": "Get User Accounts",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{gateway_url}}/accounts/1.0.0/users/{{userId}}/accounts",
+                  "host": ["{{gateway_url}}"],
+                  "path": ["accounts", "1.0.0", "users", "{{userId}}", "accounts"]
+                }
+              }
+            },
+            {
+              "name": "Get Account Details",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{gateway_url}}/accounts/1.0.0/accounts/{{accountId}}",
+                  "host": ["{{gateway_url}}"],
+                  "path": ["accounts", "1.0.0", "accounts", "{{accountId}}"]
+                }
+              }
+            },
+            {
+              "name": "Transfer Funds (Account API)",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"fromAccountId\": \"{{accountId}}\",\n  \"toAccountId\": \"{{toAccountId}}\",\n  \"amount\": 50.0\n}"
+                },
+                "url": {
+                  "raw": "{{gateway_url}}/accounts/1.0.0/accounts/transfer",
+                  "host": ["{{gateway_url}}"],
+                  "path": ["accounts", "1.0.0", "accounts", "transfer"]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Transactions API",
+          "item": [
+            {
+              "name": "Get Account Transactions",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{gateway_url}}/transactions/1.0.0/accounts/{{accountId}}/transactions",
+                  "host": ["{{gateway_url}}"],
+                  "path": ["transactions", "1.0.0", "accounts", "{{accountId}}", "transactions"]
+                }
+              }
+            },
+            {
+              "name": "Initiate Transfer",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"fromAccountId\": \"{{accountId}}\",\n  \"toAccountId\": \"{{toAccountId}}\",\n  \"amount\": 25.0,\n  \"description\": \"Payment for services\"\n}"
+                },
+                "url": {
+                  "raw": "{{gateway_url}}/transactions/1.0.0/transactions/transfer/initiation",
+                  "host": ["{{gateway_url}}"],
+                  "path": ["transactions", "1.0.0", "transactions", "transfer", "initiation"]
+                }
+              }
+            },
+            {
+              "name": "Execute Transfer",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"transactionId\": \"{{transactionId}}\"\n}"
+                },
+                "url": {
+                  "raw": "{{gateway_url}}/transactions/1.0.0/transactions/transfer/execution",
+                  "host": ["{{gateway_url}}"],
+                  "path": ["transactions", "1.0.0", "transactions", "transfer", "execution"]
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Direct to Microservices",
+      "description": "Requests made directly to the backend services (bypassing WSO2)",
+      "item": [
+        {
+          "name": "User Service (Port 8081)",
+          "item": [
+            {
+              "name": "Register User",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"username\": \"testuser\",\n  \"password\": \"password123\",\n  \"email\": \"testuser@example.com\",\n  \"firstName\": \"Test\",\n  \"lastName\": \"User\"\n}"
+                },
+                "url": {
+                  "raw": "{{user_service_url}}/users/register",
+                  "host": ["{{user_service_url}}"],
+                  "path": ["users", "register"]
+                }
+              }
+            },
+            {
+              "name": "Login User",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"username\": \"testuser\",\n  \"password\": \"password123\"\n}"
+                },
+                "url": {
+                  "raw": "{{user_service_url}}/users/login",
+                  "host": ["{{user_service_url}}"],
+                  "path": ["users", "login"]
+                }
+              }
+            },
+            {
+              "name": "Get User Profile",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{user_service_url}}/users/{{userId}}/profile",
+                  "host": ["{{user_service_url}}"],
+                  "path": ["users", "{{userId}}", "profile"]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "BFF Service (Port 8084)",
+          "item": [
+            {
+              "name": "Create Account",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"userId\": \"{{userId}}\",\n  \"accountType\": \"SAVINGS\",\n  \"initialBalance\": 100.0\n}"
+                },
+                "url": {
+                  "raw": "{{bff_service_url}}/accounts",
+                  "host": ["{{bff_service_url}}"],
+                  "path": ["accounts"]
+                }
+              }
+            },
+            {
+              "name": "Get User Accounts",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{bff_service_url}}/users/{{userId}}/accounts",
+                  "host": ["{{bff_service_url}}"],
+                  "path": ["users", "{{userId}}", "accounts"]
+                }
+              }
+            },
+            {
+              "name": "Get Account Details",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{bff_service_url}}/accounts/{{accountId}}",
+                  "host": ["{{bff_service_url}}"],
+                  "path": ["accounts", "{{accountId}}"]
+                }
+              }
+            },
+            {
+              "name": "Transfer Funds (Account API)",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"fromAccountId\": \"{{accountId}}\",\n  \"toAccountId\": \"{{toAccountId}}\",\n  \"amount\": 50.0\n}"
+                },
+                "url": {
+                  "raw": "{{bff_service_url}}/accounts/transfer",
+                  "host": ["{{bff_service_url}}"],
+                  "path": ["accounts", "transfer"]
+                }
+              }
+            },
+            {
+              "name": "Get Account Transactions",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{bff_service_url}}/accounts/{{accountId}}/transactions",
+                  "host": ["{{bff_service_url}}"],
+                  "path": ["accounts", "{{accountId}}", "transactions"]
+                }
+              }
+            },
+            {
+              "name": "Initiate Transfer",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"fromAccountId\": \"{{accountId}}\",\n  \"toAccountId\": \"{{toAccountId}}\",\n  \"amount\": 25.0,\n  \"description\": \"Payment for services\"\n}"
+                },
+                "url": {
+                  "raw": "{{bff_service_url}}/transactions/transfer/initiation",
+                  "host": ["{{bff_service_url}}"],
+                  "path": ["transactions", "transfer", "initiation"]
+                }
+              }
+            },
+            {
+              "name": "Execute Transfer",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"transactionId\": \"{{transactionId}}\"\n}"
+                },
+                "url": {
+                  "raw": "{{bff_service_url}}/transactions/transfer/execution",
+                  "host": ["{{bff_service_url}}"],
+                  "path": ["transactions", "transfer", "execution"]
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
