@@ -4,4 +4,3 @@ data:
  -
    displayOnDevportal: true
    deploymentEnvironment: Default
-api
