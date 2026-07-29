@@ -1,7 +1,6 @@
 type: api_product
 version: v4.7.0
 data:
-  id: da74784c-e45b-4cca-9988-f46a1a2a0d25
   name: vbank
   displayName: vbank
   context: /vbank
@@ -55,7 +54,6 @@ data:
      - DELETE
      - PATCH
      - OPTIONS
-  createdTime: "1785273226031"
   gatewayVendor: wso2
   apis:
    -
