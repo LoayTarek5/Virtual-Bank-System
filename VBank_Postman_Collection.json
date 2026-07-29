@@ -43,390 +43,1046 @@
   ],
   "item": [
     {
-      "name": "WSO2 Gateway Requests",
-      "description": "Requests routed through the WSO2 API Gateway",
+      "name": "Localhost Environment",
       "item": [
         {
-          "name": "Auth API",
+          "name": "WSO2 Gateway Requests (Local)",
+          "description": "Requests routed through the WSO2 API Gateway",
           "item": [
             {
-              "name": "Register User",
-              "request": {
-                "method": "POST",
-                "header": [
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json"
+              "name": "Auth API",
+              "item": [
+                {
+                  "name": "Register User",
+                  "request": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"username\": \"testuser\",\n  \"password\": \"password123\",\n  \"email\": \"testuser@example.com\",\n  \"firstName\": \"Test\",\n  \"lastName\": \"User\"\n}"
+                    },
+                    "url": {
+                      "raw": "{{gateway_url}}/register/1.0.0/users/register",
+                      "host": [
+                        "{{gateway_url}}"
+                      ],
+                      "path": [
+                        "register",
+                        "1.0.0",
+                        "users",
+                        "register"
+                      ]
+                    }
                   }
-                ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"username\": \"testuser\",\n  \"password\": \"password123\",\n  \"email\": \"testuser@example.com\",\n  \"firstName\": \"Test\",\n  \"lastName\": \"User\"\n}"
                 },
-                "url": {
-                  "raw": "{{gateway_url}}/register/1.0.0/users/register",
-                  "host": ["{{gateway_url}}"],
-                  "path": ["register", "1.0.0", "users", "register"]
+                {
+                  "name": "Login User",
+                  "request": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"username\": \"testuser\",\n  \"password\": \"password123\"\n}"
+                    },
+                    "url": {
+                      "raw": "{{gateway_url}}/login/1.0.0/users/login",
+                      "host": [
+                        "{{gateway_url}}"
+                      ],
+                      "path": [
+                        "login",
+                        "1.0.0",
+                        "users",
+                        "login"
+                      ]
+                    }
+                  }
                 }
-              }
+              ]
             },
             {
-              "name": "Login User",
-              "request": {
-                "method": "POST",
-                "header": [
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json"
+              "name": "Profile API",
+              "item": [
+                {
+                  "name": "Get User Profile",
+                  "request": {
+                    "method": "GET",
+                    "header": [],
+                    "url": {
+                      "raw": "{{gateway_url}}/profile/1.0.0/users/{{userId}}/profile",
+                      "host": [
+                        "{{gateway_url}}"
+                      ],
+                      "path": [
+                        "profile",
+                        "1.0.0",
+                        "users",
+                        "{{userId}}",
+                        "profile"
+                      ]
+                    }
                   }
-                ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"username\": \"testuser\",\n  \"password\": \"password123\"\n}"
-                },
-                "url": {
-                  "raw": "{{gateway_url}}/login/1.0.0/users/login",
-                  "host": ["{{gateway_url}}"],
-                  "path": ["login", "1.0.0", "users", "login"]
                 }
-              }
+              ]
+            },
+            {
+              "name": "Accounts API",
+              "item": [
+                {
+                  "name": "Create Account",
+                  "request": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"userId\": \"{{userId}}\",\n  \"accountType\": \"SAVINGS\",\n  \"initialBalance\": 100.0\n}"
+                    },
+                    "url": {
+                      "raw": "{{gateway_url}}/accounts/1.0.0/accounts",
+                      "host": [
+                        "{{gateway_url}}"
+                      ],
+                      "path": [
+                        "accounts",
+                        "1.0.0",
+                        "accounts"
+                      ]
+                    }
+                  }
+                },
+                {
+                  "name": "Get User Accounts",
+                  "request": {
+                    "method": "GET",
+                    "header": [],
+                    "url": {
+                      "raw": "{{gateway_url}}/accounts/1.0.0/users/{{userId}}/accounts",
+                      "host": [
+                        "{{gateway_url}}"
+                      ],
+                      "path": [
+                        "accounts",
+                        "1.0.0",
+                        "users",
+                        "{{userId}}",
+                        "accounts"
+                      ]
+                    }
+                  }
+                },
+                {
+                  "name": "Get Account Details",
+                  "request": {
+                    "method": "GET",
+                    "header": [],
+                    "url": {
+                      "raw": "{{gateway_url}}/accounts/1.0.0/accounts/{{accountId}}",
+                      "host": [
+                        "{{gateway_url}}"
+                      ],
+                      "path": [
+                        "accounts",
+                        "1.0.0",
+                        "accounts",
+                        "{{accountId}}"
+                      ]
+                    }
+                  }
+                },
+                {
+                  "name": "Transfer Funds (Account API)",
+                  "request": {
+                    "method": "PUT",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"fromAccountId\": \"{{accountId}}\",\n  \"toAccountId\": \"{{toAccountId}}\",\n  \"amount\": 50.0\n}"
+                    },
+                    "url": {
+                      "raw": "{{gateway_url}}/accounts/1.0.0/accounts/transfer",
+                      "host": [
+                        "{{gateway_url}}"
+                      ],
+                      "path": [
+                        "accounts",
+                        "1.0.0",
+                        "accounts",
+                        "transfer"
+                      ]
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Transactions API",
+              "item": [
+                {
+                  "name": "Get Account Transactions",
+                  "request": {
+                    "method": "GET",
+                    "header": [],
+                    "url": {
+                      "raw": "{{gateway_url}}/transactions/1.0.0/accounts/{{accountId}}/transactions",
+                      "host": [
+                        "{{gateway_url}}"
+                      ],
+                      "path": [
+                        "transactions",
+                        "1.0.0",
+                        "accounts",
+                        "{{accountId}}",
+                        "transactions"
+                      ]
+                    }
+                  }
+                },
+                {
+                  "name": "Initiate Transfer",
+                  "request": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"fromAccountId\": \"{{accountId}}\",\n  \"toAccountId\": \"{{toAccountId}}\",\n  \"amount\": 25.0,\n  \"description\": \"Payment for services\"\n}"
+                    },
+                    "url": {
+                      "raw": "{{gateway_url}}/transactions/1.0.0/transactions/transfer/initiation",
+                      "host": [
+                        "{{gateway_url}}"
+                      ],
+                      "path": [
+                        "transactions",
+                        "1.0.0",
+                        "transactions",
+                        "transfer",
+                        "initiation"
+                      ]
+                    }
+                  }
+                },
+                {
+                  "name": "Execute Transfer",
+                  "request": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"transactionId\": \"{{transactionId}}\"\n}"
+                    },
+                    "url": {
+                      "raw": "{{gateway_url}}/transactions/1.0.0/transactions/transfer/execution",
+                      "host": [
+                        "{{gateway_url}}"
+                      ],
+                      "path": [
+                        "transactions",
+                        "1.0.0",
+                        "transactions",
+                        "transfer",
+                        "execution"
+                      ]
+                    }
+                  }
+                }
+              ]
             }
           ]
         },
         {
-          "name": "Profile API",
+          "name": "Direct to Microservices (Local)",
+          "description": "Requests made directly to the backend services (bypassing WSO2)",
           "item": [
             {
-              "name": "Get User Profile",
-              "request": {
-                "method": "GET",
-                "header": [],
-                "url": {
-                  "raw": "{{gateway_url}}/profile/1.0.0/users/{{userId}}/profile",
-                  "host": ["{{gateway_url}}"],
-                  "path": ["profile", "1.0.0", "users", "{{userId}}", "profile"]
-                }
-              }
-            }
-          ]
-        },
-        {
-          "name": "Accounts API",
-          "item": [
-            {
-              "name": "Create Account",
-              "request": {
-                "method": "POST",
-                "header": [
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json"
+              "name": "User Service (Port 8081)",
+              "item": [
+                {
+                  "name": "Register User",
+                  "request": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"username\": \"testuser\",\n  \"password\": \"password123\",\n  \"email\": \"testuser@example.com\",\n  \"firstName\": \"Test\",\n  \"lastName\": \"User\"\n}"
+                    },
+                    "url": {
+                      "raw": "{{user_service_url}}/users/register",
+                      "host": [
+                        "{{user_service_url}}"
+                      ],
+                      "path": [
+                        "users",
+                        "register"
+                      ]
+                    }
                   }
-                ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"userId\": \"{{userId}}\",\n  \"accountType\": \"SAVINGS\",\n  \"initialBalance\": 100.0\n}"
                 },
-                "url": {
-                  "raw": "{{gateway_url}}/accounts/1.0.0/accounts",
-                  "host": ["{{gateway_url}}"],
-                  "path": ["accounts", "1.0.0", "accounts"]
-                }
-              }
-            },
-            {
-              "name": "Get User Accounts",
-              "request": {
-                "method": "GET",
-                "header": [],
-                "url": {
-                  "raw": "{{gateway_url}}/accounts/1.0.0/users/{{userId}}/accounts",
-                  "host": ["{{gateway_url}}"],
-                  "path": ["accounts", "1.0.0", "users", "{{userId}}", "accounts"]
-                }
-              }
-            },
-            {
-              "name": "Get Account Details",
-              "request": {
-                "method": "GET",
-                "header": [],
-                "url": {
-                  "raw": "{{gateway_url}}/accounts/1.0.0/accounts/{{accountId}}",
-                  "host": ["{{gateway_url}}"],
-                  "path": ["accounts", "1.0.0", "accounts", "{{accountId}}"]
-                }
-              }
-            },
-            {
-              "name": "Transfer Funds (Account API)",
-              "request": {
-                "method": "PUT",
-                "header": [
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json"
+                {
+                  "name": "Login User",
+                  "request": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"username\": \"testuser\",\n  \"password\": \"password123\"\n}"
+                    },
+                    "url": {
+                      "raw": "{{user_service_url}}/users/login",
+                      "host": [
+                        "{{user_service_url}}"
+                      ],
+                      "path": [
+                        "users",
+                        "login"
+                      ]
+                    }
                   }
-                ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"fromAccountId\": \"{{accountId}}\",\n  \"toAccountId\": \"{{toAccountId}}\",\n  \"amount\": 50.0\n}"
                 },
-                "url": {
-                  "raw": "{{gateway_url}}/accounts/1.0.0/accounts/transfer",
-                  "host": ["{{gateway_url}}"],
-                  "path": ["accounts", "1.0.0", "accounts", "transfer"]
+                {
+                  "name": "Get User Profile",
+                  "request": {
+                    "method": "GET",
+                    "header": [],
+                    "url": {
+                      "raw": "{{user_service_url}}/users/{{userId}}/profile",
+                      "host": [
+                        "{{user_service_url}}"
+                      ],
+                      "path": [
+                        "users",
+                        "{{userId}}",
+                        "profile"
+                      ]
+                    }
+                  }
                 }
-              }
-            }
-          ]
-        },
-        {
-          "name": "Transactions API",
-          "item": [
-            {
-              "name": "Get Account Transactions",
-              "request": {
-                "method": "GET",
-                "header": [],
-                "url": {
-                  "raw": "{{gateway_url}}/transactions/1.0.0/accounts/{{accountId}}/transactions",
-                  "host": ["{{gateway_url}}"],
-                  "path": ["transactions", "1.0.0", "accounts", "{{accountId}}", "transactions"]
-                }
-              }
+              ]
             },
             {
-              "name": "Initiate Transfer",
-              "request": {
-                "method": "POST",
-                "header": [
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json"
+              "name": "BFF Service (Port 8084)",
+              "item": [
+                {
+                  "name": "Create Account",
+                  "request": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"userId\": \"{{userId}}\",\n  \"accountType\": \"SAVINGS\",\n  \"initialBalance\": 100.0\n}"
+                    },
+                    "url": {
+                      "raw": "{{bff_service_url}}/accounts",
+                      "host": [
+                        "{{bff_service_url}}"
+                      ],
+                      "path": [
+                        "accounts"
+                      ]
+                    }
                   }
-                ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"fromAccountId\": \"{{accountId}}\",\n  \"toAccountId\": \"{{toAccountId}}\",\n  \"amount\": 25.0,\n  \"description\": \"Payment for services\"\n}"
                 },
-                "url": {
-                  "raw": "{{gateway_url}}/transactions/1.0.0/transactions/transfer/initiation",
-                  "host": ["{{gateway_url}}"],
-                  "path": ["transactions", "1.0.0", "transactions", "transfer", "initiation"]
-                }
-              }
-            },
-            {
-              "name": "Execute Transfer",
-              "request": {
-                "method": "POST",
-                "header": [
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json"
+                {
+                  "name": "Get User Accounts",
+                  "request": {
+                    "method": "GET",
+                    "header": [],
+                    "url": {
+                      "raw": "{{bff_service_url}}/users/{{userId}}/accounts",
+                      "host": [
+                        "{{bff_service_url}}"
+                      ],
+                      "path": [
+                        "users",
+                        "{{userId}}",
+                        "accounts"
+                      ]
+                    }
                   }
-                ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"transactionId\": \"{{transactionId}}\"\n}"
                 },
-                "url": {
-                  "raw": "{{gateway_url}}/transactions/1.0.0/transactions/transfer/execution",
-                  "host": ["{{gateway_url}}"],
-                  "path": ["transactions", "1.0.0", "transactions", "transfer", "execution"]
+                {
+                  "name": "Get Account Details",
+                  "request": {
+                    "method": "GET",
+                    "header": [],
+                    "url": {
+                      "raw": "{{bff_service_url}}/accounts/{{accountId}}",
+                      "host": [
+                        "{{bff_service_url}}"
+                      ],
+                      "path": [
+                        "accounts",
+                        "{{accountId}}"
+                      ]
+                    }
+                  }
+                },
+                {
+                  "name": "Transfer Funds (Account API)",
+                  "request": {
+                    "method": "PUT",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"fromAccountId\": \"{{accountId}}\",\n  \"toAccountId\": \"{{toAccountId}}\",\n  \"amount\": 50.0\n}"
+                    },
+                    "url": {
+                      "raw": "{{bff_service_url}}/accounts/transfer",
+                      "host": [
+                        "{{bff_service_url}}"
+                      ],
+                      "path": [
+                        "accounts",
+                        "transfer"
+                      ]
+                    }
+                  }
+                },
+                {
+                  "name": "Get Account Transactions",
+                  "request": {
+                    "method": "GET",
+                    "header": [],
+                    "url": {
+                      "raw": "{{bff_service_url}}/accounts/{{accountId}}/transactions",
+                      "host": [
+                        "{{bff_service_url}}"
+                      ],
+                      "path": [
+                        "accounts",
+                        "{{accountId}}",
+                        "transactions"
+                      ]
+                    }
+                  }
+                },
+                {
+                  "name": "Initiate Transfer",
+                  "request": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"fromAccountId\": \"{{accountId}}\",\n  \"toAccountId\": \"{{toAccountId}}\",\n  \"amount\": 25.0,\n  \"description\": \"Payment for services\"\n}"
+                    },
+                    "url": {
+                      "raw": "{{bff_service_url}}/transactions/transfer/initiation",
+                      "host": [
+                        "{{bff_service_url}}"
+                      ],
+                      "path": [
+                        "transactions",
+                        "transfer",
+                        "initiation"
+                      ]
+                    }
+                  }
+                },
+                {
+                  "name": "Execute Transfer",
+                  "request": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"transactionId\": \"{{transactionId}}\"\n}"
+                    },
+                    "url": {
+                      "raw": "{{bff_service_url}}/transactions/transfer/execution",
+                      "host": [
+                        "{{bff_service_url}}"
+                      ],
+                      "path": [
+                        "transactions",
+                        "transfer",
+                        "execution"
+                      ]
+                    }
+                  }
                 }
-              }
+              ]
             }
           ]
         }
       ]
     },
     {
-      "name": "Direct to Microservices",
-      "description": "Requests made directly to the backend services (bypassing WSO2)",
+      "name": "Azure Cloud Environment",
       "item": [
         {
-          "name": "User Service (Port 8081)",
+          "name": "WSO2 Gateway Requests (Azure)",
+          "description": "Requests routed through the WSO2 API Gateway",
           "item": [
             {
-              "name": "Register User",
-              "request": {
-                "method": "POST",
-                "header": [
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json"
+              "name": "Auth API",
+              "item": [
+                {
+                  "name": "Register User",
+                  "request": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"username\": \"testuser\",\n  \"password\": \"password123\",\n  \"email\": \"testuser@example.com\",\n  \"firstName\": \"Test\",\n  \"lastName\": \"User\"\n}"
+                    },
+                    "url": {
+                      "raw": "http://ejadavbank.swedencentral.cloudapp.azure.com:8280/register/1.0.0/users/register",
+                      "host": [
+                        "http://ejadavbank.swedencentral.cloudapp.azure.com:8280"
+                      ],
+                      "path": [
+                        "register",
+                        "1.0.0",
+                        "users",
+                        "register"
+                      ]
+                    }
                   }
-                ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"username\": \"testuser\",\n  \"password\": \"password123\",\n  \"email\": \"testuser@example.com\",\n  \"firstName\": \"Test\",\n  \"lastName\": \"User\"\n}"
                 },
-                "url": {
-                  "raw": "{{user_service_url}}/users/register",
-                  "host": ["{{user_service_url}}"],
-                  "path": ["users", "register"]
+                {
+                  "name": "Login User",
+                  "request": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"username\": \"testuser\",\n  \"password\": \"password123\"\n}"
+                    },
+                    "url": {
+                      "raw": "http://ejadavbank.swedencentral.cloudapp.azure.com:8280/login/1.0.0/users/login",
+                      "host": [
+                        "http://ejadavbank.swedencentral.cloudapp.azure.com:8280"
+                      ],
+                      "path": [
+                        "login",
+                        "1.0.0",
+                        "users",
+                        "login"
+                      ]
+                    }
+                  }
                 }
-              }
+              ]
             },
             {
-              "name": "Login User",
-              "request": {
-                "method": "POST",
-                "header": [
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json"
+              "name": "Profile API",
+              "item": [
+                {
+                  "name": "Get User Profile",
+                  "request": {
+                    "method": "GET",
+                    "header": [],
+                    "url": {
+                      "raw": "http://ejadavbank.swedencentral.cloudapp.azure.com:8280/profile/1.0.0/users/{{userId}}/profile",
+                      "host": [
+                        "http://ejadavbank.swedencentral.cloudapp.azure.com:8280"
+                      ],
+                      "path": [
+                        "profile",
+                        "1.0.0",
+                        "users",
+                        "{{userId}}",
+                        "profile"
+                      ]
+                    }
                   }
-                ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"username\": \"testuser\",\n  \"password\": \"password123\"\n}"
-                },
-                "url": {
-                  "raw": "{{user_service_url}}/users/login",
-                  "host": ["{{user_service_url}}"],
-                  "path": ["users", "login"]
                 }
-              }
+              ]
             },
             {
-              "name": "Get User Profile",
-              "request": {
-                "method": "GET",
-                "header": [],
-                "url": {
-                  "raw": "{{user_service_url}}/users/{{userId}}/profile",
-                  "host": ["{{user_service_url}}"],
-                  "path": ["users", "{{userId}}", "profile"]
+              "name": "Accounts API",
+              "item": [
+                {
+                  "name": "Create Account",
+                  "request": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"userId\": \"{{userId}}\",\n  \"accountType\": \"SAVINGS\",\n  \"initialBalance\": 100.0\n}"
+                    },
+                    "url": {
+                      "raw": "http://ejadavbank.swedencentral.cloudapp.azure.com:8280/accounts/1.0.0/accounts",
+                      "host": [
+                        "http://ejadavbank.swedencentral.cloudapp.azure.com:8280"
+                      ],
+                      "path": [
+                        "accounts",
+                        "1.0.0",
+                        "accounts"
+                      ]
+                    }
+                  }
+                },
+                {
+                  "name": "Get User Accounts",
+                  "request": {
+                    "method": "GET",
+                    "header": [],
+                    "url": {
+                      "raw": "http://ejadavbank.swedencentral.cloudapp.azure.com:8280/accounts/1.0.0/users/{{userId}}/accounts",
+                      "host": [
+                        "http://ejadavbank.swedencentral.cloudapp.azure.com:8280"
+                      ],
+                      "path": [
+                        "accounts",
+                        "1.0.0",
+                        "users",
+                        "{{userId}}",
+                        "accounts"
+                      ]
+                    }
+                  }
+                },
+                {
+                  "name": "Get Account Details",
+                  "request": {
+                    "method": "GET",
+                    "header": [],
+                    "url": {
+                      "raw": "http://ejadavbank.swedencentral.cloudapp.azure.com:8280/accounts/1.0.0/accounts/{{accountId}}",
+                      "host": [
+                        "http://ejadavbank.swedencentral.cloudapp.azure.com:8280"
+                      ],
+                      "path": [
+                        "accounts",
+                        "1.0.0",
+                        "accounts",
+                        "{{accountId}}"
+                      ]
+                    }
+                  }
+                },
+                {
+                  "name": "Transfer Funds (Account API)",
+                  "request": {
+                    "method": "PUT",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"fromAccountId\": \"{{accountId}}\",\n  \"toAccountId\": \"{{toAccountId}}\",\n  \"amount\": 50.0\n}"
+                    },
+                    "url": {
+                      "raw": "http://ejadavbank.swedencentral.cloudapp.azure.com:8280/accounts/1.0.0/accounts/transfer",
+                      "host": [
+                        "http://ejadavbank.swedencentral.cloudapp.azure.com:8280"
+                      ],
+                      "path": [
+                        "accounts",
+                        "1.0.0",
+                        "accounts",
+                        "transfer"
+                      ]
+                    }
+                  }
                 }
-              }
+              ]
+            },
+            {
+              "name": "Transactions API",
+              "item": [
+                {
+                  "name": "Get Account Transactions",
+                  "request": {
+                    "method": "GET",
+                    "header": [],
+                    "url": {
+                      "raw": "http://ejadavbank.swedencentral.cloudapp.azure.com:8280/transactions/1.0.0/accounts/{{accountId}}/transactions",
+                      "host": [
+                        "http://ejadavbank.swedencentral.cloudapp.azure.com:8280"
+                      ],
+                      "path": [
+                        "transactions",
+                        "1.0.0",
+                        "accounts",
+                        "{{accountId}}",
+                        "transactions"
+                      ]
+                    }
+                  }
+                },
+                {
+                  "name": "Initiate Transfer",
+                  "request": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"fromAccountId\": \"{{accountId}}\",\n  \"toAccountId\": \"{{toAccountId}}\",\n  \"amount\": 25.0,\n  \"description\": \"Payment for services\"\n}"
+                    },
+                    "url": {
+                      "raw": "http://ejadavbank.swedencentral.cloudapp.azure.com:8280/transactions/1.0.0/transactions/transfer/initiation",
+                      "host": [
+                        "http://ejadavbank.swedencentral.cloudapp.azure.com:8280"
+                      ],
+                      "path": [
+                        "transactions",
+                        "1.0.0",
+                        "transactions",
+                        "transfer",
+                        "initiation"
+                      ]
+                    }
+                  }
+                },
+                {
+                  "name": "Execute Transfer",
+                  "request": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"transactionId\": \"{{transactionId}}\"\n}"
+                    },
+                    "url": {
+                      "raw": "http://ejadavbank.swedencentral.cloudapp.azure.com:8280/transactions/1.0.0/transactions/transfer/execution",
+                      "host": [
+                        "http://ejadavbank.swedencentral.cloudapp.azure.com:8280"
+                      ],
+                      "path": [
+                        "transactions",
+                        "1.0.0",
+                        "transactions",
+                        "transfer",
+                        "execution"
+                      ]
+                    }
+                  }
+                }
+              ]
             }
           ]
         },
         {
-          "name": "BFF Service (Port 8084)",
+          "name": "Direct to Microservices (Azure)",
+          "description": "Requests made directly to the backend services (bypassing WSO2)",
           "item": [
             {
-              "name": "Create Account",
-              "request": {
-                "method": "POST",
-                "header": [
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json"
+              "name": "User Service (Port 8081)",
+              "item": [
+                {
+                  "name": "Register User",
+                  "request": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"username\": \"testuser\",\n  \"password\": \"password123\",\n  \"email\": \"testuser@example.com\",\n  \"firstName\": \"Test\",\n  \"lastName\": \"User\"\n}"
+                    },
+                    "url": {
+                      "raw": "http://ejadavbank.swedencentral.cloudapp.azure.com:8081/users/register",
+                      "host": [
+                        "http://ejadavbank.swedencentral.cloudapp.azure.com:8081"
+                      ],
+                      "path": [
+                        "users",
+                        "register"
+                      ]
+                    }
                   }
-                ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"userId\": \"{{userId}}\",\n  \"accountType\": \"SAVINGS\",\n  \"initialBalance\": 100.0\n}"
                 },
-                "url": {
-                  "raw": "{{bff_service_url}}/accounts",
-                  "host": ["{{bff_service_url}}"],
-                  "path": ["accounts"]
-                }
-              }
-            },
-            {
-              "name": "Get User Accounts",
-              "request": {
-                "method": "GET",
-                "header": [],
-                "url": {
-                  "raw": "{{bff_service_url}}/users/{{userId}}/accounts",
-                  "host": ["{{bff_service_url}}"],
-                  "path": ["users", "{{userId}}", "accounts"]
-                }
-              }
-            },
-            {
-              "name": "Get Account Details",
-              "request": {
-                "method": "GET",
-                "header": [],
-                "url": {
-                  "raw": "{{bff_service_url}}/accounts/{{accountId}}",
-                  "host": ["{{bff_service_url}}"],
-                  "path": ["accounts", "{{accountId}}"]
-                }
-              }
-            },
-            {
-              "name": "Transfer Funds (Account API)",
-              "request": {
-                "method": "PUT",
-                "header": [
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json"
+                {
+                  "name": "Login User",
+                  "request": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"username\": \"testuser\",\n  \"password\": \"password123\"\n}"
+                    },
+                    "url": {
+                      "raw": "http://ejadavbank.swedencentral.cloudapp.azure.com:8081/users/login",
+                      "host": [
+                        "http://ejadavbank.swedencentral.cloudapp.azure.com:8081"
+                      ],
+                      "path": [
+                        "users",
+                        "login"
+                      ]
+                    }
                   }
-                ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"fromAccountId\": \"{{accountId}}\",\n  \"toAccountId\": \"{{toAccountId}}\",\n  \"amount\": 50.0\n}"
                 },
-                "url": {
-                  "raw": "{{bff_service_url}}/accounts/transfer",
-                  "host": ["{{bff_service_url}}"],
-                  "path": ["accounts", "transfer"]
-                }
-              }
-            },
-            {
-              "name": "Get Account Transactions",
-              "request": {
-                "method": "GET",
-                "header": [],
-                "url": {
-                  "raw": "{{bff_service_url}}/accounts/{{accountId}}/transactions",
-                  "host": ["{{bff_service_url}}"],
-                  "path": ["accounts", "{{accountId}}", "transactions"]
-                }
-              }
-            },
-            {
-              "name": "Initiate Transfer",
-              "request": {
-                "method": "POST",
-                "header": [
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json"
+                {
+                  "name": "Get User Profile",
+                  "request": {
+                    "method": "GET",
+                    "header": [],
+                    "url": {
+                      "raw": "http://ejadavbank.swedencentral.cloudapp.azure.com:8081/users/{{userId}}/profile",
+                      "host": [
+                        "http://ejadavbank.swedencentral.cloudapp.azure.com:8081"
+                      ],
+                      "path": [
+                        "users",
+                        "{{userId}}",
+                        "profile"
+                      ]
+                    }
                   }
-                ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"fromAccountId\": \"{{accountId}}\",\n  \"toAccountId\": \"{{toAccountId}}\",\n  \"amount\": 25.0,\n  \"description\": \"Payment for services\"\n}"
-                },
-                "url": {
-                  "raw": "{{bff_service_url}}/transactions/transfer/initiation",
-                  "host": ["{{bff_service_url}}"],
-                  "path": ["transactions", "transfer", "initiation"]
                 }
-              }
+              ]
             },
             {
-              "name": "Execute Transfer",
-              "request": {
-                "method": "POST",
-                "header": [
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json"
+              "name": "BFF Service (Port 8084)",
+              "item": [
+                {
+                  "name": "Create Account",
+                  "request": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"userId\": \"{{userId}}\",\n  \"accountType\": \"SAVINGS\",\n  \"initialBalance\": 100.0\n}"
+                    },
+                    "url": {
+                      "raw": "http://ejadavbank.swedencentral.cloudapp.azure.com:8084/bff/accounts",
+                      "host": [
+                        "http://ejadavbank.swedencentral.cloudapp.azure.com:8084/bff"
+                      ],
+                      "path": [
+                        "accounts"
+                      ]
+                    }
                   }
-                ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"transactionId\": \"{{transactionId}}\"\n}"
                 },
-                "url": {
-                  "raw": "{{bff_service_url}}/transactions/transfer/execution",
-                  "host": ["{{bff_service_url}}"],
-                  "path": ["transactions", "transfer", "execution"]
+                {
+                  "name": "Get User Accounts",
+                  "request": {
+                    "method": "GET",
+                    "header": [],
+                    "url": {
+                      "raw": "http://ejadavbank.swedencentral.cloudapp.azure.com:8084/bff/users/{{userId}}/accounts",
+                      "host": [
+                        "http://ejadavbank.swedencentral.cloudapp.azure.com:8084/bff"
+                      ],
+                      "path": [
+                        "users",
+                        "{{userId}}",
+                        "accounts"
+                      ]
+                    }
+                  }
+                },
+                {
+                  "name": "Get Account Details",
+                  "request": {
+                    "method": "GET",
+                    "header": [],
+                    "url": {
+                      "raw": "http://ejadavbank.swedencentral.cloudapp.azure.com:8084/bff/accounts/{{accountId}}",
+                      "host": [
+                        "http://ejadavbank.swedencentral.cloudapp.azure.com:8084/bff"
+                      ],
+                      "path": [
+                        "accounts",
+                        "{{accountId}}"
+                      ]
+                    }
+                  }
+                },
+                {
+                  "name": "Transfer Funds (Account API)",
+                  "request": {
+                    "method": "PUT",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"fromAccountId\": \"{{accountId}}\",\n  \"toAccountId\": \"{{toAccountId}}\",\n  \"amount\": 50.0\n}"
+                    },
+                    "url": {
+                      "raw": "http://ejadavbank.swedencentral.cloudapp.azure.com:8084/bff/accounts/transfer",
+                      "host": [
+                        "http://ejadavbank.swedencentral.cloudapp.azure.com:8084/bff"
+                      ],
+                      "path": [
+                        "accounts",
+                        "transfer"
+                      ]
+                    }
+                  }
+                },
+                {
+                  "name": "Get Account Transactions",
+                  "request": {
+                    "method": "GET",
+                    "header": [],
+                    "url": {
+                      "raw": "http://ejadavbank.swedencentral.cloudapp.azure.com:8084/bff/accounts/{{accountId}}/transactions",
+                      "host": [
+                        "http://ejadavbank.swedencentral.cloudapp.azure.com:8084/bff"
+                      ],
+                      "path": [
+                        "accounts",
+                        "{{accountId}}",
+                        "transactions"
+                      ]
+                    }
+                  }
+                },
+                {
+                  "name": "Initiate Transfer",
+                  "request": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"fromAccountId\": \"{{accountId}}\",\n  \"toAccountId\": \"{{toAccountId}}\",\n  \"amount\": 25.0,\n  \"description\": \"Payment for services\"\n}"
+                    },
+                    "url": {
+                      "raw": "http://ejadavbank.swedencentral.cloudapp.azure.com:8084/bff/transactions/transfer/initiation",
+                      "host": [
+                        "http://ejadavbank.swedencentral.cloudapp.azure.com:8084/bff"
+                      ],
+                      "path": [
+                        "transactions",
+                        "transfer",
+                        "initiation"
+                      ]
+                    }
+                  }
+                },
+                {
+                  "name": "Execute Transfer",
+                  "request": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"transactionId\": \"{{transactionId}}\"\n}"
+                    },
+                    "url": {
+                      "raw": "http://ejadavbank.swedencentral.cloudapp.azure.com:8084/bff/transactions/transfer/execution",
+                      "host": [
+                        "http://ejadavbank.swedencentral.cloudapp.azure.com:8084/bff"
+                      ],
+                      "path": [
+                        "transactions",
+                        "transfer",
+                        "execution"
+                      ]
+                    }
+                  }
                 }
-              }
+              ]
             }
           ]
         }
