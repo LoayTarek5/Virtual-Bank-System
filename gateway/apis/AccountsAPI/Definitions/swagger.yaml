@@ -1,0 +1,160 @@
+components:
+  schemas:
+    AccountResponse:
+      properties:
+        accountId:
+          format: uuid
+          type: string
+        accountNumber:
+          type: string
+        accountType:
+          enum:
+          - SAVINGS
+          - CHECKING
+          type: string
+        balance:
+          format: double
+          type: number
+        status:
+          enum:
+          - ACTIVE
+          - INACTIVE
+          type: string
+      type: object
+    CreateAccountRequest:
+      properties:
+        accountType:
+          enum:
+          - SAVINGS
+          - CHECKING
+          type: string
+        initialBalance:
+          example: 100
+          format: double
+          type: number
+        userId:
+          format: uuid
+          type: string
+      required:
+      - userId
+      - accountType
+      - initialBalance
+      type: object
+    CreateAccountResponse:
+      properties:
+        accountId:
+          format: uuid
+          type: string
+        accountNumber:
+          type: string
+        message:
+          type: string
+      type: object
+    MessageResponse:
+      properties:
+        message:
+          type: string
+      type: object
+    TransferRequest:
+      properties:
+        amount:
+          example: 30
+          format: double
+          type: number
+        fromAccountId:
+          format: uuid
+          type: string
+        toAccountId:
+          format: uuid
+          type: string
+      required:
+      - fromAccountId
+      - toAccountId
+      - amount
+      type: object
+info:
+  description: Bank account management for the vbank system.
+  title: AccountsAPI
+  version: 1.0.0
+openapi: 3.0.3
+paths:
+  /accounts:
+    post:
+      operationId: createAccount
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAccountRequest'
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateAccountResponse'
+          description: Account created
+        "400":
+          description: Invalid account type or initial balance
+      summary: Create a new bank account
+  /accounts/{accountId}:
+    get:
+      operationId: getAccount
+      parameters:
+      - in: path
+        name: accountId
+        required: true
+        schema:
+          format: uuid
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountResponse'
+          description: Account retrieved
+        "404":
+          description: Account not found
+      summary: Retrieve a single account
+  /accounts/transfer:
+    put:
+      operationId: transfer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransferRequest'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+          description: Transfer completed
+        "400":
+          description: Invalid account ID, insufficient funds, or inactive account
+      summary: Transfer funds between accounts
+  /users/{userId}/accounts:
+    get:
+      operationId: getUserAccounts
+      parameters:
+      - in: path
+        name: userId
+        required: true
+        schema:
+          format: uuid
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/AccountResponse'
+                type: array
+          description: Accounts retrieved
+        "404":
+          description: No accounts found for user
+      summary: List all accounts for a user

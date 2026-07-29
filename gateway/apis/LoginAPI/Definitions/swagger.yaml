@@ -1,0 +1,50 @@
+components:
+  schemas:
+    LoginRequest:
+      properties:
+        password:
+          example: securePassword123
+          format: password
+          type: string
+        username:
+          example: john.doe
+          type: string
+      required:
+      - username
+      - password
+      type: object
+    LoginResponse:
+      properties:
+        userId:
+          format: uuid
+          type: string
+        username:
+          type: string
+      type: object
+info:
+  description: User authentication for the vbank system.
+  title: LoginAPI
+  version: 1.0.0
+openapi: 3.0.3
+paths:
+  /users/login:
+    post:
+      operationId: loginUser
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+          description: Authenticated
+        "400":
+          description: Validation error
+        "401":
+          description: Invalid username or password
+      summary: Authenticate a user

@@ -1,0 +1,15 @@
+type: operation_policy_specification
+version: v4.7.0
+data:
+  category: Mediation
+  name: SetAppNameHeader
+  version: v1
+  displayName: Set App Name Header
+  description: Injects APP-NAME based on the calling application
+  applicableFlows:
+    - request
+  supportedGateways:
+    - Synapse
+  supportedApiTypes:
+    - HTTP
+  policyAttributes: []

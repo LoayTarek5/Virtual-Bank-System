@@ -1,0 +1,131 @@
+components:
+  schemas:
+    ExecutionRequest:
+      properties:
+        transactionId:
+          format: uuid
+          type: string
+      required:
+      - transactionId
+      type: object
+    InitiationRequest:
+      properties:
+        amount:
+          example: 30
+          format: double
+          type: number
+        description:
+          example: Transfer to checking account
+          type: string
+        fromAccountId:
+          format: uuid
+          type: string
+        toAccountId:
+          format: uuid
+          type: string
+      required:
+      - fromAccountId
+      - toAccountId
+      - amount
+      type: object
+    TransactionHistoryResponse:
+      properties:
+        amount:
+          format: double
+          type: number
+        deliveryStatus:
+          example: SENT
+          type: string
+        description:
+          type: string
+        fromAccountId:
+          format: uuid
+          type: string
+        timestamp:
+          format: date-time
+          type: string
+        toAccountId:
+          format: uuid
+          type: string
+        transactionId:
+          format: uuid
+          type: string
+      type: object
+    TransactionResponse:
+      properties:
+        status:
+          example: Initiated
+          type: string
+        timestamp:
+          format: date-time
+          type: string
+        transactionId:
+          format: uuid
+          type: string
+      type: object
+info:
+  description: Fund transfers and transaction history for the vbank system.
+  title: TransactionsAPI
+  version: 1.0.0
+openapi: 3.0.3
+paths:
+  /accounts/{accountId}/transactions:
+    get:
+      operationId: getTransactionHistory
+      parameters:
+      - in: path
+        name: accountId
+        required: true
+        schema:
+          format: uuid
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/TransactionHistoryResponse'
+                type: array
+          description: History retrieved
+        "404":
+          description: No transactions found for account
+      summary: Retrieve transaction history for an account
+  /transactions/transfer/execution:
+    post:
+      operationId: executeTransfer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExecutionRequest'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransactionResponse'
+          description: Transfer executed
+        "400":
+          description: Transaction not found, already executed, or insufficient funds
+      summary: Execute an initiated transfer
+  /transactions/transfer/initiation:
+    post:
+      operationId: initiateTransfer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InitiationRequest'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransactionResponse'
+          description: Transfer initiated
+        "400":
+          description: Invalid account ID or insufficient funds
+      summary: Initiate a fund transfer

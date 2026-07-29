@@ -1,0 +1,28 @@
+type: api
+version: v4.7.0
+data:
+  name: ProfileAPI
+  description: User profile retrieval for the vbank system.
+  context: /profile
+  version: 1.0.0
+  provider: admin
+  lifeCycleStatus: CREATED
+  isRevision: false
+  revisionId: 0
+  type: HTTP
+  transport:
+    - http
+    - https
+  policies:
+    - Unlimited
+  securityScheme:
+      - api_key
+      - oauth_basic_auth_api_key_mandatory
+      - oauth2
+  visibility: PUBLIC
+  endpointConfig:
+    endpoint_type: http
+    production_endpoints:
+      url: http://localhost:8084/bff
+  endpointImplementationType: ENDPOINT
+  websubSubscriptionConfiguration: null
