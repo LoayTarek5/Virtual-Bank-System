@@ -23,6 +23,6 @@ data:
   endpointConfig:
     endpoint_type: http
     production_endpoints:
-      url: http://localhost:8084/bff
+      url: http://bff-service:8084/bff
   endpointImplementationType: ENDPOINT
   websubSubscriptionConfiguration: null

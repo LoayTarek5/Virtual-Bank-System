@@ -23,6 +23,6 @@ data:
   endpointConfig:
     endpoint_type: http
     production_endpoints:
-      url: http://localhost:8081
+      url: http://user-service:8081
   endpointImplementationType: ENDPOINT
   websubSubscriptionConfiguration: null
