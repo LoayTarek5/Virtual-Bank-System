@@ -135,5 +135,18 @@ services:
       kafka:
         condition: service_started
 
+  wso2am:
+    image: wso2/wso2am:4.3.0
+    container_name: vbank-wso2am
+    ports:
+      - "8280:8280"
+      - "8243:8243"
+      - "9443:9443"
+    environment:
+      - JVM_MEM_OPTS=-Xmx1536m -Xms1536m
+    depends_on:
+      postgres:
+        condition: service_healthy
+
 volumes:
   pgdata:
