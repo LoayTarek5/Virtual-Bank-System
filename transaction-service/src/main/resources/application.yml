@@ -5,7 +5,7 @@ spring:
   application:
     name: transaction-service
   datasource:
-    url: jdbc:postgresql://localhost:5432/vbank_transactions
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/vbank_transactions}
     username: vbank
     password: vbank
   jpa:
@@ -17,7 +17,7 @@ spring:
       connect-timeout: 2s
       read-timeout: 5s
   kafka:
-    bootstrap-servers: localhost:9092
+    bootstrap-servers: ${KAFKA_URL:localhost:9092}
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.apache.kafka.common.serialization.StringSerializer
@@ -26,4 +26,4 @@ spring:
 
 services:
   account:
-    base-url: http://localhost:8082
+    base-url: ${ACCOUNT_SERVICE_URL:http://localhost:8082}
