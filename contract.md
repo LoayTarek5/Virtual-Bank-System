@@ -329,7 +329,7 @@ Message format (JSON string value):
 | Register | `POST /users/register` | user-service `POST /users/register` | Direct gateway→user-service |
 | Login | `POST /users/login` | user-service `POST /users/login` | Direct gateway→user-service |
 | Profile | `GET /users/{userId}/profile` | BFF `GET /bff/users/{userId}/profile` | BFF forwards to user-service |
-| Accounts | `GET /users/{userId}/accounts`, `POST /accounts`, `PUT /accounts/transfer` | BFF `/bff` equivalents | BFF forwards to account-service |
+| Accounts | `GET /users/{userId}/accounts`, `GET /accounts/{accountId}`, `POST /accounts`, `PUT /accounts/transfer` | BFF `/bff` equivalents | BFF forwards to account-service |
 | Transactions | `POST /transactions/transfer/initiation`, `POST /transactions/transfer/execution`, `GET /accounts/{accountId}/transactions` | BFF `/bff` equivalents | BFF forwards to transaction-service |
 | **vbank** (API product) | `/vbank/*` | bundles all above endpoints | Wrapped under `/vbank` prefix |
 
@@ -337,7 +337,6 @@ Message format (JSON string value):
 - Applications: `vbank portal`, `vbank mobile`.
 - Gateway injects header `APP-NAME: PORTAL | MOBILE` on every forwarded request (to BFF or microservices).
 - **Path mirroring:** external resource paths are identical to the backend paths (minus the BFF's `/bff` prefix, which lives in the endpoint URL). This keeps the gateway free of any path-rewriting policy — `APP-NAME` injection is the only mediation policy in the system.
-- `GET /bff/accounts/{accountId}` is intentionally not routed — the accounts list already returns every field it would.
 - **Dashboard assembly:** No aggregation endpoint. Frontend is responsible for calling multiple endpoints and combining the responses (profile + accounts + transactions per account).
 
 ---
@@ -603,3 +602,4 @@ Recorded here rather than in a separate file. Anything that deviates from the sp
 | 2025-07-24 | Initial version from spec                                                                                                                                                                                                                                                                                | Loay + Ahmed |
 | 2025-07-24 | **Mentor guidance applied:** BFF simplified to passthrough middleware. Removed aggregation, removed dashboard endpoint, frontend responsible for multi-call composition. Updated §4 with explicit endpoint table and RestClient pattern. Updated §6 gateway route map to clarify BFF's transparent role. | Mentor + Loay + Ahmed |
 | 2026-07-28 | **6. gateway route map corrected.** Added `GET /accounts/{accountId}/transactions` — dashboard assembly requires per-account transactions but no route exposed them. Changed external resource paths to mirror backend paths exactly, removing the need for path-rewriting mediation policies.           | Loay |
+| 2026-07-28 | §6: added `GET /accounts/{accountId}` to the Accounts API — single-account fetch rather than filtering the full list client-side. | Loay |
