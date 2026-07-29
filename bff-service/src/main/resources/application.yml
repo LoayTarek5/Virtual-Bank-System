@@ -5,7 +5,7 @@ spring:
   application:
     name: bff-service
   kafka:
-    bootstrap-servers: localhost:9092
+    bootstrap-servers: ${KAFKA_URL:localhost:9092}
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.apache.kafka.common.serialization.StringSerializer
@@ -14,6 +14,6 @@ spring:
 
 vbank:
   services:
-    user: http://localhost:8081
-    account: http://localhost:8082
-    transaction: http://localhost:8083
+    user: ${USER_SERVICE_URL:http://localhost:8081}
+    account: ${ACCOUNT_SERVICE_URL:http://localhost:8082}
+    transaction: ${TRANSACTION_SERVICE_URL:http://localhost:8083}
