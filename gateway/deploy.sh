@@ -120,6 +120,16 @@ case "$out" in
   *)        echo "  $PRODUCT -> PUBLISHED" ;;
 esac
 
+# The product's gateway artifact syncs on a delay the APIs don't have —
+# a verify fired immediately after import sees 404 while it's still deploying.
+say "Waiting for the product to deploy to the gateway"
+for _ in $(seq 30); do
+  code=$(curl -k -s -o /dev/null -w '%{http_code}' -X POST \
+           "https://$HOST:$GATEWAY_PORT/vbank/users/register")
+  [ "$code" = "401" ] && break
+  sleep 2
+done
+
 # ------------------------------------------------------------------ verify
 say "Verifying through the product namespace (401 = routed and secured)"
 fail=0

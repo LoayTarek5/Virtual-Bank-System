@@ -15,199 +15,225 @@ data:
   responseCachingEnabled: false
   cacheTimeout: 300
   visibility: PUBLIC
-  visibleRoles: []
-  visibleTenants: []
+  visibleRoles: [ ]
+  visibleTenants: [ ]
   accessControl: NONE
-  accessControlRoles: []
+  accessControlRoles: [ ]
   transport:
-   - http
-   - https
-  tags: []
+    - http
+    - https
+  tags: [ ]
   policies:
-   - Unlimited
+    - Unlimited
   authorizationHeader: Authorization
   apiKeyHeader: ApiKey
   securityScheme:
-   - oauth_basic_auth_api_key_mandatory
-   - oauth2
+    - api_key
+    - oauth_basic_auth_api_key_mandatory
+    - oauth2
   subscriptionAvailability: ALL_TENANTS
-  subscriptionAvailableTenants: []
-  additionalProperties: []
-  additionalPropertiesMap: {}
-  businessInformation: {}
+  subscriptionAvailableTenants: [ ]
+  additionalProperties: [ ]
+  additionalPropertiesMap: { }
+  businessInformation: { }
   corsConfiguration:
     corsConfigurationEnabled: false
     accessControlAllowOrigins:
-     - '*'
+      - '*'
     accessControlAllowCredentials: false
     accessControlAllowHeaders:
-     - authorization
-     - Access-Control-Allow-Origin
-     - Content-Type
-     - SOAPAction
-     - apikey
-     - Internal-Key
+      - authorization
+      - Access-Control-Allow-Origin
+      - Content-Type
+      - SOAPAction
+      - apikey
+      - Internal-Key
     accessControlAllowMethods:
-     - GET
-     - PUT
-     - POST
-     - DELETE
-     - PATCH
-     - OPTIONS
+      - GET
+      - PUT
+      - POST
+      - DELETE
+      - PATCH
+      - OPTIONS
   gatewayVendor: wso2
   apis:
-   -
-    name: LoginAPI
-    version: 1.0.0
-    operations:
-     -
-      id: ""
-      target: /users/login
-      verb: POST
-      authType: Application & Application User
-      throttlingPolicy: Unlimited
-      scopes: []
-      usedProductIds: []
-      operationPolicies:
-        request: []
-        response: []
-        fault: []
-      operationHubPolicies: []
-   -
-    name: ProfileAPI
-    version: 1.0.0
-    operations:
-     -
-      id: ""
-      target: "/users/{userId}/profile"
-      verb: GET
-      authType: Application & Application User
-      throttlingPolicy: Unlimited
-      scopes: []
-      usedProductIds: []
-      operationPolicies:
-        request: []
-        response: []
-        fault: []
-      operationHubPolicies: []
-   -
-    name: AccountsAPI
-    version: 1.0.0
-    operations:
-     -
-      id: ""
-      target: /accounts
-      verb: POST
-      authType: Application & Application User
-      throttlingPolicy: Unlimited
-      scopes: []
-      usedProductIds: []
-      operationPolicies:
-        request: []
-        response: []
-        fault: []
-      operationHubPolicies: []
-     -
-      id: ""
-      target: "/accounts/{accountId}"
-      verb: GET
-      authType: Application & Application User
-      throttlingPolicy: Unlimited
-      scopes: []
-      usedProductIds: []
-      operationPolicies:
-        request: []
-        response: []
-        fault: []
-      operationHubPolicies: []
-     -
-      id: ""
-      target: /accounts/transfer
-      verb: PUT
-      authType: Application & Application User
-      throttlingPolicy: Unlimited
-      scopes: []
-      usedProductIds: []
-      operationPolicies:
-        request: []
-        response: []
-        fault: []
-      operationHubPolicies: []
-     -
-      id: ""
-      target: "/users/{userId}/accounts"
-      verb: GET
-      authType: Application & Application User
-      throttlingPolicy: Unlimited
-      scopes: []
-      usedProductIds: []
-      operationPolicies:
-        request: []
-        response: []
-        fault: []
-      operationHubPolicies: []
-   -
-    name: TransactionsAPI
-    version: 1.0.0
-    operations:
-     -
-      id: ""
-      target: "/accounts/{accountId}/transactions"
-      verb: GET
-      authType: Application & Application User
-      throttlingPolicy: Unlimited
-      scopes: []
-      usedProductIds: []
-      operationPolicies:
-        request: []
-        response: []
-        fault: []
-      operationHubPolicies: []
-     -
-      id: ""
-      target: /transactions/transfer/execution
-      verb: POST
-      authType: Application & Application User
-      throttlingPolicy: Unlimited
-      scopes: []
-      usedProductIds: []
-      operationPolicies:
-        request: []
-        response: []
-        fault: []
-      operationHubPolicies: []
-     -
-      id: ""
-      target: /transactions/transfer/initiation
-      verb: POST
-      authType: Application & Application User
-      throttlingPolicy: Unlimited
-      scopes: []
-      usedProductIds: []
-      operationPolicies:
-        request: []
-        response: []
-        fault: []
-      operationHubPolicies: []
-   -
-    name: RegisterAPI
-    version: 1.0.0
-    operations:
-     -
-      id: ""
-      target: /users/register
-      verb: POST
-      authType: Application & Application User
-      throttlingPolicy: Unlimited
-      scopes: []
-      usedProductIds: []
-      operationPolicies:
-        request: []
-        response: []
-        fault: []
-      operationHubPolicies: []
-  scopes: []
-  categories: []
+    - name: LoginAPI
+      version: 1.0.0
+      operations:
+        - id: ""
+          target: /users/login
+          verb: POST
+          authType: Application & Application User
+          throttlingPolicy: Unlimited
+          scopes: [ ]
+          usedProductIds: [ ]
+          operationPolicies:
+            request:
+              - policyName: SetAppNameHeader
+                policyVersion: v1
+                policyType: common
+                parameters: { }
+            response: [ ]
+            fault: [ ]
+          operationHubPolicies: [ ]
+    - name: ProfileAPI
+      version: 1.0.0
+      operations:
+        - id: ""
+          target: "/users/{userId}/profile"
+          verb: GET
+          authType: Application & Application User
+          throttlingPolicy: Unlimited
+          scopes: [ ]
+          usedProductIds: [ ]
+          operationPolicies:
+            request:
+              - policyName: SetAppNameHeader
+                policyVersion: v1
+                policyType: common
+                parameters: { }
+            response: [ ]
+            fault: [ ]
+          operationHubPolicies: [ ]
+    - name: AccountsAPI
+      version: 1.0.0
+      operations:
+        - id: ""
+          target: /accounts
+          verb: POST
+          authType: Application & Application User
+          throttlingPolicy: Unlimited
+          scopes: [ ]
+          usedProductIds: [ ]
+          operationPolicies:
+            request:
+              - policyName: SetAppNameHeader
+                policyVersion: v1
+                policyType: common
+                parameters: { }
+            response: [ ]
+            fault: [ ]
+          operationHubPolicies: [ ]
+        - id: ""
+          target: "/accounts/{accountId}"
+          verb: GET
+          authType: Application & Application User
+          throttlingPolicy: Unlimited
+          scopes: [ ]
+          usedProductIds: [ ]
+          operationPolicies:
+            request:
+              - policyName: SetAppNameHeader
+                policyVersion: v1
+                policyType: common
+                parameters: { }
+            response: [ ]
+            fault: [ ]
+          operationHubPolicies: [ ]
+        - id: ""
+          target: /accounts/transfer
+          verb: PUT
+          authType: Application & Application User
+          throttlingPolicy: Unlimited
+          scopes: [ ]
+          usedProductIds: [ ]
+          operationPolicies:
+            request:
+              - policyName: SetAppNameHeader
+                policyVersion: v1
+                policyType: common
+                parameters: { }
+            response: [ ]
+            fault: [ ]
+          operationHubPolicies: [ ]
+        - id: ""
+          target: "/users/{userId}/accounts"
+          verb: GET
+          authType: Application & Application User
+          throttlingPolicy: Unlimited
+          scopes: [ ]
+          usedProductIds: [ ]
+          operationPolicies:
+            request:
+              - policyName: SetAppNameHeader
+                policyVersion: v1
+                policyType: common
+                parameters: { }
+            response: [ ]
+            fault: [ ]
+          operationHubPolicies: [ ]
+    - name: TransactionsAPI
+      version: 1.0.0
+      operations:
+        - id: ""
+          target: "/accounts/{accountId}/transactions"
+          verb: GET
+          authType: Application & Application User
+          throttlingPolicy: Unlimited
+          scopes: [ ]
+          usedProductIds: [ ]
+          operationPolicies:
+            request:
+              - policyName: SetAppNameHeader
+                policyVersion: v1
+                policyType: common
+                parameters: { }
+            response: [ ]
+            fault: [ ]
+          operationHubPolicies: [ ]
+        - id: ""
+          target: /transactions/transfer/execution
+          verb: POST
+          authType: Application & Application User
+          throttlingPolicy: Unlimited
+          scopes: [ ]
+          usedProductIds: [ ]
+          operationPolicies:
+            request:
+              - policyName: SetAppNameHeader
+                policyVersion: v1
+                policyType: common
+                parameters: { }
+            response: [ ]
+            fault: [ ]
+          operationHubPolicies: [ ]
+        - id: ""
+          target: /transactions/transfer/initiation
+          verb: POST
+          authType: Application & Application User
+          throttlingPolicy: Unlimited
+          scopes: [ ]
+          usedProductIds: [ ]
+          operationPolicies:
+            request:
+              - policyName: SetAppNameHeader
+                policyVersion: v1
+                policyType: common
+                parameters: { }
+            response: [ ]
+            fault: [ ]
+          operationHubPolicies: [ ]
+    - name: RegisterAPI
+      version: 1.0.0
+      operations:
+        - id: ""
+          target: /users/register
+          verb: POST
+          authType: Application & Application User
+          throttlingPolicy: Unlimited
+          scopes: [ ]
+          usedProductIds: [ ]
+          operationPolicies:
+            request:
+              - policyName: SetAppNameHeader
+                policyVersion: v1
+                policyType: common
+                parameters: { }
+            response: [ ]
+            fault: [ ]
+          operationHubPolicies: [ ]
+  scopes: [ ]
+  categories: [ ]
   audiences:
-   - all
+    - all
   egress: false

@@ -1,0 +1,13 @@
+<sequence xmlns="http://ws.apache.org/ns/synapse" name="setAppNameHeader">
+    <switch source="$ctx:api.ut.application.name">
+        <case regex="vbank portal">
+            <header name="APP-NAME" scope="transport" value="PORTAL"/>
+        </case>
+        <case regex="vbank mobile">
+            <header name="APP-NAME" scope="transport" value="MOBILE"/>
+        </case>
+        <default>
+            <header name="APP-NAME" scope="transport" action="remove"/>
+        </default>
+    </switch>
+</sequence>

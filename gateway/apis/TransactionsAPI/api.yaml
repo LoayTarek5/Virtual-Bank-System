@@ -15,6 +15,10 @@ data:
     - https
   policies:
     - Unlimited
+  securityScheme:
+    - api_key
+    - oauth_basic_auth_api_key_mandatory
+    - oauth2
   visibility: PUBLIC
   endpointConfig:
     endpoint_type: http
